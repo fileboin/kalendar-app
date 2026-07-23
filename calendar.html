@@ -1,0 +1,1363 @@
+﻿<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#302b63">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Kalendar">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>Kalendar</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg1: #0f0c29; --bg2: #302b63; --bg3: #24243e;
+            --card-bg: rgba(255,255,255,0.05); --card-border: rgba(255,255,255,0.1);
+            --accent1: #667eea; --accent2: #764ba2;
+            --accent-glow: rgba(102,126,234,0.4); --accent-bg: rgba(102,126,234,0.3);
+            --accent-border: rgba(102,126,234,0.6);
+            --text: #fff; --text-s: rgba(255,255,255,0.75);
+            --text-m: rgba(255,255,255,0.4); --text-f: rgba(255,255,255,0.2);
+            --text-d: rgba(255,255,255,0.35); --modal-bg: rgba(30,27,60,0.95);
+            --card-hover: rgba(255,255,255,0.12); --input-bg: rgba(255,255,255,0.06);
+            --border-l: rgba(255,255,255,0.12); --scrollbar: rgba(255,255,255,0.15);
+        }
+        .theme-pink { --bg1:#2d1b36; --bg2:#4a2040; --bg3:#3d1f3d; --accent1:#f093fb; --accent2:#f5576c; --accent-glow:rgba(240,147,251,0.4); --accent-bg:rgba(240,147,251,0.25); --accent-border:rgba(240,147,251,0.5); --modal-bg:rgba(55,30,55,0.95); }
+        .theme-purple { --bg1:#1a0a2e; --bg2:#3d1d6b; --bg3:#2a1245; --accent1:#a855f7; --accent2:#7c3aed; --accent-glow:rgba(168,85,247,0.4); --accent-bg:rgba(168,85,247,0.25); --accent-border:rgba(168,85,247,0.5); --modal-bg:rgba(35,18,60,0.95); }
+        .theme-gray { --bg1:#111; --bg2:#1a1a1a; --bg3:#0d0d0d; --accent1:#6b7280; --accent2:#4b5563; --accent-glow:rgba(107,114,128,0.4); --accent-bg:rgba(107,114,128,0.25); --accent-border:rgba(107,114,128,0.5); --modal-bg:rgba(26,26,26,0.95); }
+        .theme-yellow { --bg1:#1a1500; --bg2:#332d00; --bg3:#242000; --accent1:#f59e0b; --accent2:#d97706; --accent-glow:rgba(245,158,11,0.4); --accent-bg:rgba(245,158,11,0.25); --accent-border:rgba(245,158,11,0.5); --modal-bg:rgba(30,26,5,0.95); }
+        .theme-green { --bg1:#051a0a; --bg2:#0a3a1a; --bg3:#082a0f; --accent1:#22c55e; --accent2:#16a34a; --accent-glow:rgba(34,197,94,0.4); --accent-bg:rgba(34,197,94,0.25); --accent-border:rgba(34,197,94,0.5); --modal-bg:rgba(10,30,15,0.95); }
+        .theme-red { --bg1:#1a0505; --bg2:#3a0a0a; --bg3:#2a0808; --accent1:#ef4444; --accent2:#dc2626; --accent-glow:rgba(239,68,68,0.4); --accent-bg:rgba(239,68,68,0.25); --accent-border:rgba(239,68,68,0.5); --modal-bg:rgba(40,10,10,0.95); }
+        .theme-orange { --bg1:#1a0f05; --bg2:#3a200a; --bg3:#2a1808; --accent1:#f97316; --accent2:#ea580c; --accent-glow:rgba(249,115,22,0.4); --accent-bg:rgba(249,115,22,0.25); --accent-border:rgba(249,115,22,0.5); --modal-bg:rgba(40,25,10,0.95); }
+        .theme-white { --bg1:#c8c8d4; --bg2:#e8e8f0; --bg3:#d0d0dc; --card-bg:rgba(255,255,255,0.7); --card-border:rgba(0,0,0,0.1); --accent1:#3b82f6; --accent2:#2563eb; --accent-glow:rgba(59,130,246,0.35); --accent-bg:rgba(59,130,246,0.15); --accent-border:rgba(59,130,246,0.4); --text:#1a1a2e; --text-s:rgba(26,26,46,0.8); --text-m:rgba(26,26,46,0.45); --text-f:rgba(26,26,46,0.2); --text-d:rgba(26,26,46,0.4); --modal-bg:rgba(255,255,255,0.95); --card-hover:rgba(0,0,0,0.06); --input-bg:rgba(0,0,0,0.05); --border-l:rgba(0,0,0,0.12); --scrollbar:rgba(0,0,0,0.15); }
+        .theme-black { --bg1:#000; --bg2:#000; --bg3:#000; --card-bg:rgba(255,255,255,0.04); --card-border:rgba(255,255,255,0.08); --modal-bg:rgba(10,10,10,0.98); }
+
+        body { min-height:100vh; display:flex; justify-content:center; align-items:flex-start; background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3)); background-attachment:fixed; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; padding:20px; color:var(--text); transition:background 0.4s ease; }
+        .calendar { width:380px; background:var(--card-bg); backdrop-filter:blur(20px); border-radius:20px; padding:30px; border:1px solid var(--card-border); box-shadow:0 25px 50px rgba(0,0,0,0.5); }
+        .calendar-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; }
+        .calendar-header h2 { color:var(--text); font-size:22px; font-weight:600; }
+        .nav-buttons { display:flex; gap:8px; }
+        .nav-btn { width:36px; height:36px; border-radius:10px; border:1px solid var(--border-l); background:var(--input-bg); color:var(--text); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s ease; }
+        .nav-btn:hover { background:var(--card-hover); transform:scale(1.05); }
+        .weekdays { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:10px; }
+        .weekday { text-align:center; color:var(--text-m); font-size:12px; font-weight:600; text-transform:uppercase; padding:8px 0; }
+        .days { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+        .day { text-align:center; padding:12px 0; color:var(--text-s); border-radius:12px; cursor:pointer; font-size:14px; font-weight:500; transition:all 0.2s ease; position:relative; }
+        .day:hover:not(.empty):not(.today) { background:var(--card-hover); color:var(--text); }
+        .day.today { background:linear-gradient(135deg,var(--accent1),var(--accent2)); color:var(--text); font-weight:700; box-shadow:0 4px 15px var(--accent-glow); }
+        .day.selected { background:var(--accent-bg); border:1px solid var(--accent-border); color:var(--text); }
+        .day.other-month { color:var(--text-f); }
+        .day.empty { cursor:default; }
+        .day.has-event::after { content:''; position:absolute; bottom:4px; left:50%; transform:translateX(-50%); width:5px; height:5px; border-radius:50%; background:#f093fb; }
+        .day.today.has-event::after { background:var(--text); }
+        .day.has-alarm::before { content:''; position:absolute; top:4px; right:4px; width:6px; height:6px; border-radius:50%; background:#fbbf24; box-shadow:0 0 6px rgba(251,191,36,0.5); }
+        .day.today.has-alarm::before { background:#fef08a; box-shadow:0 0 6px rgba(254,240,138,0.6); }
+        .day.has-both::after { left:calc(50% - 5px); }
+        .day.has-both::before { right:auto; left:calc(50% + 3px); }
+        .legend { margin-top:20px; padding-top:20px; border-top:1px solid var(--card-border); display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+        .legend-item { display:flex; align-items:center; gap:6px; color:var(--text-m); font-size:12px; }
+        .legend-dot { width:8px; height:8px; border-radius:50%; }
+        .legend-dot.today { background:linear-gradient(135deg,var(--accent1),var(--accent2)); }
+        .legend-dot.event { background:#f093fb; }
+        .legend-dot.alarm { background:#fbbf24; }
+        .legend-dot.selected { background:var(--accent-bg); border:1px solid var(--accent-border); }
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); display:flex; justify-content:center; align-items:center; z-index:100; opacity:0; visibility:hidden; transition:all 0.25s ease; }
+        .modal-overlay.active { opacity:1; visibility:visible; }
+        .modal { background:var(--modal-bg); backdrop-filter:blur(20px); border-radius:20px; padding:28px; width:380px; max-width:90vw; max-height:85vh; overflow-y:auto; border:1px solid var(--card-border); box-shadow:0 25px 60px rgba(0,0,0,0.5); transform:translateY(20px) scale(0.95); transition:transform 0.25s ease; }
+        .modal::-webkit-scrollbar { width:4px; }
+        .modal::-webkit-scrollbar-thumb { background:var(--scrollbar); border-radius:4px; }
+        .modal-overlay.active .modal { transform:translateY(0) scale(1); }
+        .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+        .modal-header h3 { color:var(--text); font-size:18px; font-weight:600; }
+        .modal-close { width:32px; height:32px; border-radius:8px; border:1px solid var(--border-l); background:var(--input-bg); color:var(--text-m); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s ease; }
+        .modal-close:hover { background:rgba(255,80,80,0.2); color:#ff5050; border-color:rgba(255,80,80,0.3); }
+        .modal textarea { width:100%; height:80px; border-radius:12px; border:1px solid var(--border-l); background:var(--input-bg); color:var(--text); font-family:inherit; font-size:14px; padding:14px; resize:none; outline:none; transition:border-color 0.2s ease; }
+        .modal textarea::placeholder { color:var(--text-d); }
+        .modal textarea:focus { border-color:var(--accent-border); }
+        .modal-actions { display:flex; gap:10px; margin-top:12px; }
+        .modal-btn { flex:1; padding:10px; border-radius:10px; border:none; font-family:inherit; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s ease; }
+        .modal-btn.save { background:linear-gradient(135deg,var(--accent1),var(--accent2)); color:var(--text); }
+        .modal-btn.save:hover { box-shadow:0 4px 15px var(--accent-glow); transform:translateY(-1px); }
+        .modal-btn.cancel { background:var(--input-bg); color:var(--text-s); border:1px solid var(--border-l); }
+        .modal-btn.cancel:hover { background:var(--card-hover); color:var(--text); }
+        .section-divider { border:none; border-top:1px solid var(--card-border); margin:18px 0; }
+        .section-label { color:var(--text-d); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; }
+        .alarm-form { display:flex; gap:8px; margin-bottom:10px; }
+        .alarm-form input[type="time"] { width:110px; padding:9px 10px; border-radius:10px; border:1px solid var(--border-l); background:var(--input-bg); color:var(--text); font-family:inherit; font-size:13px; outline:none; transition:border-color 0.2s ease; }
+        .alarm-form input[type="time"]:focus { border-color:var(--accent-border); }
+        .alarm-form input[type="time"]::-webkit-calendar-picker-indicator { filter:invert(0.7); }
+        .alarm-form input[type="text"] { flex:1; padding:9px 12px; border-radius:10px; border:1px solid var(--border-l); background:var(--input-bg); color:var(--text); font-family:inherit; font-size:13px; outline:none; transition:border-color 0.2s ease; }
+        .alarm-form input[type="text"]::placeholder { color:var(--text-d); }
+        .alarm-form input[type="text"]:focus { border-color:var(--accent-border); }
+        .alarm-add-btn { padding:9px 14px; border-radius:10px; border:none; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; transition:all 0.2s ease; }
+        .alarm-add-btn:hover { box-shadow:0 4px 12px rgba(245,158,11,0.35); transform:translateY(-1px); }
+        .alarm-item { display:flex; align-items:center; gap:10px; padding:10px 12px; background:rgba(251,191,36,0.06); border:1px solid rgba(251,191,36,0.12); border-radius:10px; margin-bottom:6px; }
+        .alarm-item.past { opacity:0.4; }
+        .alarm-time-badge { background:rgba(251,191,36,0.2); color:#fbbf24; font-size:13px; font-weight:700; padding:4px 8px; border-radius:6px; white-space:nowrap; }
+        .alarm-item.past .alarm-time-badge { background:var(--input-bg); color:var(--text-d); }
+        .alarm-item span, .note-item span { flex:1; color:var(--text-s); font-size:13px; line-height:1.4; word-break:break-word; }
+        .note-item { display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--input-bg); border:1px solid var(--card-border); border-radius:10px; margin-bottom:6px; }
+        .delete-btn { width:26px; height:26px; border-radius:6px; border:none; background:rgba(255,80,80,0.12); color:#ff5050; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s ease; }
+        .delete-btn:hover { background:rgba(255,80,80,0.25); }
+        .no-items { color:var(--text-d); font-size:13px; text-align:center; padding:10px 0; }
+        .active-alarms-panel { width:380px; margin-top:16px; background:var(--card-bg); backdrop-filter:blur(20px); border-radius:16px; padding:22px; border:1px solid var(--card-border); box-shadow:0 15px 35px rgba(0,0,0,0.3); }
+        .panel-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+        .panel-header h3 { color:var(--text); font-size:15px; font-weight:600; display:flex; align-items:center; gap:8px; }
+        .alarm-count-badge { background:rgba(251,191,36,0.2); color:#fbbf24; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; }
+        .panel-toggle { background:none; border:none; color:var(--text-m); font-size:12px; cursor:pointer; transition:color 0.2s ease; }
+        .panel-toggle:hover { color:var(--text-s); }
+        .panel-alarms-list { max-height:200px; overflow-y:auto; }
+        .panel-alarms-list::-webkit-scrollbar { width:4px; }
+        .panel-alarms-list::-webkit-scrollbar-thumb { background:var(--scrollbar); border-radius:4px; }
+        .panel-alarm-item { display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--input-bg); border:1px solid var(--card-border); border-radius:10px; margin-bottom:6px; transition:background 0.2s ease; }
+        .panel-alarm-item:hover { background:var(--card-hover); }
+        .panel-alarm-date { color:var(--text-m); font-size:11px; white-space:nowrap; }
+        .panel-alarm-time { color:#fbbf24; font-size:13px; font-weight:700; white-space:nowrap; }
+        .panel-alarm-text { flex:1; color:var(--text-s); font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .no-alarms { color:var(--text-d); font-size:13px; text-align:center; padding:14px 0; }
+        .ai-chat-panel { width:380px; margin-top:16px; background:var(--card-bg); backdrop-filter:blur(20px); border-radius:16px; padding:22px; border:1px solid var(--card-border); box-shadow:0 15px 35px rgba(0,0,0,0.3); }
+        .chat-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+        .chat-header h3 { color:var(--text); font-size:15px; font-weight:600; display:flex; align-items:center; gap:8px; }
+        .chat-settings-btn { background:none; border:none; color:var(--text-m); font-size:16px; cursor:pointer; transition:color 0.2s ease; padding:4px; }
+        .chat-settings-btn:hover { color:var(--text-s); }
+        .chat-messages { max-height:300px; overflow-y:auto; margin-bottom:14px; display:flex; flex-direction:column; gap:10px; }
+        .chat-messages::-webkit-scrollbar { width:4px; }
+        .chat-messages::-webkit-scrollbar-thumb { background:var(--scrollbar); border-radius:4px; }
+        .chat-msg { max-width:85%; padding:10px 14px; border-radius:14px; font-size:13px; line-height:1.5; word-break:break-word; }
+        .chat-msg.user { align-self:flex-end; background:linear-gradient(135deg,var(--accent1),var(--accent2)); color:var(--text); border-bottom-right-radius:4px; }
+        .chat-msg.ai { align-self:flex-start; background:var(--input-bg); border:1px solid var(--card-border); color:var(--text-s); border-bottom-left-radius:4px; }
+        .chat-msg.error { align-self:flex-start; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#fca5a5; }
+        .chat-msg .msg-time { font-size:10px; color:var(--text-d); margin-top:4px; }
+        .chat-msg.user .msg-time { color:rgba(255,255,255,0.6); }
+        .chat-input-row { display:flex; gap:8px; align-items:center; }
+        .chat-input { flex:1; padding:10px 14px; border-radius:12px; border:1px solid var(--border-l); background:var(--input-bg); color:var(--text); font-family:inherit; font-size:13px; outline:none; transition:border-color 0.2s ease; resize:none; min-height:40px; max-height:100px; }
+        .chat-input::placeholder { color:var(--text-d); }
+        .chat-input:focus { border-color:var(--accent-border); }
+        .chat-send-btn { width:40px; height:40px; border-radius:12px; border:none; background:linear-gradient(135deg,var(--accent1),var(--accent2)); color:var(--text); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s ease; }
+        .chat-send-btn:hover { box-shadow:0 4px 12px var(--accent-glow); transform:translateY(-1px); }
+        .chat-send-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; box-shadow:none; }
+        .chat-mic-btn { width:40px; height:40px; border-radius:12px; border:1px solid var(--border-l); background:var(--input-bg); color:var(--text-m); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s ease; }
+        .chat-mic-btn:hover { color:var(--text-s); border-color:var(--accent-border); }
+        .chat-mic-btn.recording { background:rgba(239,68,68,0.2); border-color:rgba(239,68,68,0.5); color:#ef4444; animation:pulse-mic 1.5s ease-in-out infinite; }
+        @keyframes pulse-mic { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)} 50%{box-shadow:0 0 0 8px rgba(239,68,68,0)} }
+        .chat-provider-select { padding:6px 10px; border-radius:8px; border:1px solid var(--border-l); background:var(--input-bg); color:var(--text-s); font-family:inherit; font-size:11px; outline:none; cursor:pointer; }
+        .chat-provider-select:focus { border-color:var(--accent-border); }
+        .chat-empty { color:var(--text-d); font-size:13px; text-align:center; padding:20px 0; line-height:1.6; }
+        .chat-empty .chat-empty-icon { font-size:28px; margin-bottom:8px; }
+        .chat-typing { display:flex; gap:4px; padding:10px 14px; background:var(--input-bg); border:1px solid var(--card-border); border-radius:14px; border-bottom-left-radius:4px; align-self:flex-start; }
+        .chat-typing span { width:6px; height:6px; border-radius:50%; background:var(--text-d); animation:typing-dot 1.4s ease-in-out infinite; }
+        .chat-typing span:nth-child(2) { animation-delay:0.2s; }
+        .chat-typing span:nth-child(3) { animation-delay:0.4s; }
+        @keyframes typing-dot { 0%,60%,100%{transform:translateY(0);opacity:0.4} 30%{transform:translateY(-6px);opacity:1} }
+        .chat-action-badge { display:inline-block; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600; margin-top:6px; }
+        .chat-action-badge.note { background:rgba(240,147,251,0.2); color:#f093fb; }
+        .chat-action-badge.alarm { background:rgba(251,191,36,0.2); color:#fbbf24; }
+        .chat-action-badge.send { background:rgba(34,197,94,0.2); color:#22c55e; }
+        .chat-action-badge.list { background:rgba(102,126,234,0.2); color:#667eea; }
+        .view-toggle { display:flex; width:380px; margin-bottom:16px; background:var(--card-bg); backdrop-filter:blur(20px); border-radius:14px; border:1px solid var(--card-border); overflow:hidden; }
+        .view-toggle-btn { flex:1; padding:12px; border:none; background:none; color:var(--text-m); font-family:inherit; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.25s ease; }
+        .view-toggle-btn.active { background:linear-gradient(135deg,var(--accent1),var(--accent2)); color:var(--text); box-shadow:0 4px 15px var(--accent-glow); }
+        .view-toggle-btn:not(.active):hover { color:var(--text-s); background:var(--card-hover); }
+        .notes-container { width:380px; position:relative; }
+        .notes-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:10px 0 80px; }
+        .note-card { border-radius:14px; padding:14px; min-height:120px; cursor:pointer; transition:all 0.2s ease; position:relative; overflow:hidden; display:flex; flex-direction:column; border:1px solid rgba(0,0,0,0.08); }
+        .note-card:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(0,0,0,0.25); }
+        .note-card.locked { justify-content:center; align-items:center; }
+        .note-card.locked .note-card-preview { display:none; }
+        .note-card-title { font-size:13px; font-weight:700; margin-bottom:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .note-card-preview { font-size:11px; opacity:0.8; line-height:1.4; flex:1; overflow:hidden; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; }
+        .note-card-checklist { list-style:none; font-size:11px; flex:1; overflow:hidden; }
+        .note-card-checklist li { padding:2px 0; display:flex; align-items:center; gap:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .note-card-checklist li::before { content:''; width:10px; height:10px; border-radius:3px; border:1.5px solid currentColor; flex-shrink:0; }
+        .note-card-checklist li.checked::before { background:currentColor; }
+        .note-card-lock { font-size:32px; opacity:0.5; }
+        .note-card-lock-label { font-size:10px; opacity:0.45; margin-top:6px; text-transform:uppercase; letter-spacing:0.5px; }
+        .note-card-dots { position:absolute; inset:0; opacity:0.06; pointer-events:none; background:repeating-linear-gradient(45deg,currentColor 0,currentColor 1px,transparent 1px,transparent 8px); }
+        .note-card .note-card-pin { position:absolute; top:8px; right:8px; font-size:11px; opacity:0.5; }
+        .note-card .note-card-type { position:absolute; bottom:8px; right:8px; font-size:10px; opacity:0.4; }
+        .notes-fab { position:absolute; bottom:20px; right:20px; width:56px; height:56px; border-radius:50%; border:none; background:linear-gradient(135deg,var(--accent1),var(--accent2)); color:var(--text); font-size:28px; cursor:pointer; box-shadow:0 8px 25px var(--accent-glow); transition:all 0.2s ease; z-index:50; display:flex; align-items:center; justify-content:center; }
+        .notes-fab:hover { transform:scale(1.1) translateY(-2px); }
+        .note-editor { display:flex; flex-direction:column; gap:12px; }
+        .note-editor-title { width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--border-l); background:var(--input-bg); color:var(--text); font-family:inherit; font-size:15px; font-weight:600; outline:none; }
+        .note-editor-title::placeholder { color:var(--text-d); }
+        .note-editor-title:focus { border-color:var(--accent-border); }
+        .note-editor-text { width:100%; min-height:140px; border-radius:10px; border:1px solid var(--border-l); background:var(--input-bg); color:var(--text); font-family:inherit; font-size:13px; padding:12px 14px; resize:vertical; outline:none; line-height:1.5; }
+        .note-editor-text::placeholder { color:var(--text-d); }
+        .note-editor-text:focus { border-color:var(--accent-border); }
+        .color-picker { display:flex; gap:6px; flex-wrap:wrap; }
+        .color-dot { width:28px; height:28px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition:all 0.15s ease; }
+        .color-dot:hover { transform:scale(1.15); }
+        .color-dot.active { border-color:var(--text); box-shadow:0 0 8px rgba(255,255,255,0.3); }
+        .note-type-toggle { display:flex; gap:6px; }
+        .note-type-btn { padding:6px 12px; border-radius:8px; border:1px solid var(--border-l); background:var(--input-bg); color:var(--text-m); font-family:inherit; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.15s ease; }
+        .note-type-btn.active { background:var(--accent-bg); color:var(--text); border-color:var(--accent-border); }
+        .checklist-editor { display:flex; flex-direction:column; gap:6px; }
+        .checklist-row { display:flex; align-items:center; gap:6px; }
+        .checklist-check { width:18px; height:18px; border-radius:4px; border:1.5px solid var(--text-d); background:none; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--text); font-size:11px; transition:all 0.15s ease; }
+        .checklist-check.checked { background:var(--accent1); border-color:var(--accent1); }
+        .checklist-check.checked::after { content:'\2713'; }
+        .checklist-input { flex:1; padding:7px 10px; border-radius:8px; border:1px solid var(--border-l); background:var(--input-bg); color:var(--text); font-family:inherit; font-size:12px; outline:none; }
+        .checklist-input:focus { border-color:var(--accent-border); }
+        .checklist-input.checked-input { text-decoration:line-through; opacity:0.5; }
+        .checklist-del { width:22px; height:22px; border-radius:4px; border:none; background:none; color:var(--text-d); cursor:pointer; font-size:12px; flex-shrink:0; }
+        .checklist-del:hover { color:#ff5050; }
+        .checklist-add { padding:6px; border-radius:8px; border:1px dashed var(--border-l); background:none; color:var(--text-d); font-family:inherit; font-size:11px; cursor:pointer; transition:all 0.15s ease; }
+        .checklist-add:hover { color:var(--text-s); border-color:var(--accent-border); }
+        .note-lock-row { display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--input-bg); border-radius:10px; border:1px solid var(--card-border); }
+        .note-lock-row label { flex:1; font-size:12px; color:var(--text-s); }
+        .toggle-switch { position:relative; width:40px; height:22px; cursor:pointer; }
+        .toggle-switch input { opacity:0; width:0; height:0; }
+        .toggle-slider { position:absolute; inset:0; background:var(--border-l); border-radius:11px; transition:all 0.2s ease; }
+        .toggle-slider::before { content:''; position:absolute; width:18px; height:18px; border-radius:50%; background:var(--text-m); top:2px; left:2px; transition:all 0.2s ease; }
+        .toggle-switch input:checked + .toggle-slider { background:var(--accent1); }
+        .toggle-switch input:checked + .toggle-slider::before { transform:translateX(18px); background:var(--text); }
+        .pin-entry { display:flex; flex-direction:column; align-items:center; gap:16px; }
+        .pin-dots { display:flex; gap:12px; }
+        .pin-dot { width:14px; height:14px; border-radius:50%; border:2px solid var(--text-d); transition:all 0.15s ease; }
+        .pin-dot.filled { background:var(--accent1); border-color:var(--accent1); }
+        .pin-keypad { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; width:220px; }
+        .pin-key { width:64px; height:48px; border-radius:10px; border:1px solid var(--border-l); background:var(--input-bg); color:var(--text); font-size:20px; font-weight:600; cursor:pointer; transition:all 0.15s ease; display:flex; align-items:center; justify-content:center; }
+        .pin-key:hover { background:var(--card-hover); }
+        .pin-key:active { transform:scale(0.95); }
+        .pin-key.empty { border:none; background:none; cursor:default; }
+        .pin-key.del { font-size:14px; }
+        .pin-key.ok { background:linear-gradient(135deg,var(--accent1),var(--accent2)); color:var(--text); font-size:14px; }
+        .note-editor-actions { display:flex; gap:8px; }
+        .note-editor-actions .modal-btn { flex:1; }
+        .reminder-popup { position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(6px); display:flex; justify-content:center; align-items:center; z-index:300; opacity:0; visibility:hidden; transition:all 0.3s ease; }
+        .reminder-popup.active { opacity:1; visibility:visible; }
+        .reminder-card { background:var(--modal-bg); backdrop-filter:blur(20px); border-radius:24px; padding:32px; width:340px; max-width:90vw; text-align:center; border:1px solid var(--card-border); box-shadow:0 30px 70px rgba(0,0,0,0.6); transform:scale(0.8) translateY(30px); transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+        .reminder-popup.active .reminder-card { transform:scale(1) translateY(0); }
+        .reminder-icon { font-size:52px; margin-bottom:12px; animation:reminder-bounce 0.6s ease-in-out infinite alternate; }
+        @keyframes reminder-bounce { 0%{transform:translateY(0)} 100%{transform:translateY(-8px)} }
+        .reminder-time { font-size:28px; font-weight:700; color:var(--text); margin-bottom:4px; }
+        .reminder-text { font-size:14px; color:var(--text-s); margin-bottom:20px; line-height:1.5; }
+        .reminder-actions { display:flex; flex-direction:column; gap:10px; }
+        .viber-btn { display:flex; align-items:center; justify-content:center; gap:10px; padding:14px 20px; border-radius:14px; border:none; background:linear-gradient(135deg,#7360f2,#9b59b5); color:#fff; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; transition:all 0.2s ease; text-decoration:none; }
+        .viber-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(115,96,242,0.4); }
+        .viber-btn svg { width:22px; height:22px; fill:#fff; }
+        .reminder-dismiss { padding:12px; border-radius:12px; border:1px solid var(--border-l); background:var(--input-bg); color:var(--text-s); font-family:inherit; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s ease; }
+        .reminder-dismiss:hover { background:var(--card-hover); color:var(--text); }
+        .alarm-action-row { display:flex; align-items:center; gap:8px; margin-top:8px; padding:8px 10px; background:var(--input-bg); border:1px solid var(--card-border); border-radius:10px; }
+        .alarm-action-row label { font-size:11px; color:var(--text-m); white-space:nowrap; }
+        .alarm-action-row input { flex:1; padding:6px 8px; border-radius:6px; border:1px solid var(--border-l); background:rgba(255,255,255,0.04); color:var(--text); font-family:inherit; font-size:11px; outline:none; }
+        .alarm-action-row input::placeholder { color:var(--text-d); }
+        .alarm-action-row input:focus { border-color:var(--accent-border); }
+        .notification-toast { position:fixed; top:20px; right:20px; background:var(--modal-bg); backdrop-filter:blur(20px); border:1px solid rgba(251,191,36,0.3); border-radius:14px; padding:16px 20px; z-index:200; display:flex; align-items:center; gap:12px; box-shadow:0 15px 40px rgba(0,0,0,0.5); transform:translateX(120%); transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1); max-width:320px; }
+        .notification-toast.show { transform:translateX(0); }
+        .toast-icon { font-size:24px; flex-shrink:0; }
+        .toast-body { flex:1; }
+        .toast-title { color:#fbbf24; font-size:13px; font-weight:700; margin-bottom:2px; }
+        .toast-message { color:var(--text-s); font-size:12px; }
+        .toast-close { background:none; border:none; color:var(--text-m); font-size:16px; cursor:pointer; padding:4px; transition:color 0.2s ease; }
+        .toast-close:hover { color:var(--text); }
+        @keyframes pulse-alarm { 0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,0.4)} 50%{box-shadow:0 0 0 8px rgba(251,191,36,0)} }
+        .day.alarm-firing { animation:pulse-alarm 1s ease-in-out 3; }
+        .theme-toggle { position:relative; }
+        .theme-btn { width:32px; height:32px; border-radius:50%; border:2px solid var(--border-l); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:15px; transition:all 0.2s ease; background:var(--input-bg); }
+        .theme-btn:hover { transform:scale(1.1); border-color:var(--accent-border); }
+        .theme-dropdown { position:absolute; top:calc(100% + 10px); right:0; background:var(--modal-bg); backdrop-filter:blur(20px); border:1px solid var(--card-border); border-radius:14px; padding:10px; z-index:50; min-width:200px; box-shadow:0 15px 40px rgba(0,0,0,0.5); opacity:0; visibility:hidden; transform:translateY(-8px); transition:all 0.2s ease; }
+        .theme-dropdown.open { opacity:1; visibility:visible; transform:translateY(0); }
+        .theme-dropdown-title { color:var(--text-d); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; padding:4px 8px 8px; }
+        .theme-option { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px; cursor:pointer; transition:background 0.15s ease; border:none; background:none; width:100%; font-family:inherit; color:var(--text-s); font-size:13px; }
+        .theme-option:hover { background:var(--card-hover); }
+        .theme-option.active { background:var(--accent-bg); color:var(--text); }
+        .theme-swatch { width:22px; height:22px; border-radius:50%; border:2px solid rgba(255,255,255,0.15); flex-shrink:0; }
+        .theme-option.active .theme-swatch { border-color:var(--accent1); box-shadow:0 0 8px var(--accent-glow); }
+        .theme-option .check-icon { margin-left:auto; color:var(--accent1); font-size:14px; opacity:0; transition:opacity 0.15s ease; }
+        .theme-option.active .check-icon { opacity:1; }
+        .lang-toggle { position:relative; }
+        .lang-btn { width:32px; height:32px; border-radius:50%; border:2px solid var(--border-l); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; transition:all 0.2s ease; background:var(--input-bg); color:var(--text-s); text-transform:uppercase; }
+        .lang-btn:hover { transform:scale(1.1); border-color:var(--accent-border); }
+        .lang-dropdown { position:absolute; top:calc(100% + 10px); right:0; background:var(--modal-bg); backdrop-filter:blur(20px); border:1px solid var(--card-border); border-radius:14px; padding:10px; z-index:50; min-width:180px; max-height:320px; overflow-y:auto; box-shadow:0 15px 40px rgba(0,0,0,0.5); opacity:0; visibility:hidden; transform:translateY(-8px); transition:all 0.2s ease; }
+        .lang-dropdown::-webkit-scrollbar { width:4px; }
+        .lang-dropdown::-webkit-scrollbar-thumb { background:var(--scrollbar); border-radius:4px; }
+        .lang-dropdown.open { opacity:1; visibility:visible; transform:translateY(0); }
+        .lang-option { display:flex; align-items:center; gap:8px; padding:7px 10px; border-radius:8px; cursor:pointer; transition:background 0.15s ease; border:none; background:none; width:100%; font-family:inherit; color:var(--text-s); font-size:12px; }
+        .lang-option:hover { background:var(--card-hover); }
+        .lang-option.active { background:var(--accent-bg); color:var(--text); }
+        .lang-option .lang-flag { font-size:15px; flex-shrink:0; }
+        .lang-option .lang-check { margin-left:auto; color:var(--accent1); font-size:13px; opacity:0; transition:opacity 0.15s ease; }
+        .lang-option.active .lang-check { opacity:1; }
+        .platform-selector { display:flex; gap:4px; flex-wrap:wrap; margin-top:8px; }
+        .platform-btn { padding:5px 8px; border-radius:8px; border:1px solid var(--border-l); background:var(--input-bg); color:var(--text-m); font-size:11px; font-weight:600; cursor:pointer; transition:all 0.15s ease; display:flex; align-items:center; gap:4px; font-family:inherit; }
+        .platform-btn.active { background:var(--accent-bg); color:var(--text); border-color:var(--accent-border); }
+        .platform-btn:hover { background:var(--card-hover); }
+        .platform-fields { display:flex; gap:8px; margin-top:8px; }
+        .platform-fields input { flex:1; padding:6px 8px; border-radius:6px; border:1px solid var(--border-l); background:var(--input-bg); color:var(--text); font-family:inherit; font-size:11px; outline:none; }
+        .platform-fields input::placeholder { color:var(--text-d); }
+        .platform-fields input:focus { border-color:var(--accent-border); }
+        .share-buttons-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+        .share-btn { display:flex; align-items:center; justify-content:center; gap:8px; padding:12px 14px; border-radius:12px; border:none; color:#fff; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s ease; text-decoration:none; }
+        .share-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.3); }
+        .share-btn.viber-btn-s { background:linear-gradient(135deg,#7360f2,#9b59b5); }
+        .share-btn.whatsapp-btn-s { background:linear-gradient(135deg,#25D366,#128C7E); }
+        .share-btn.telegram-btn-s { background:linear-gradient(135deg,#0088cc,#229ED9); }
+        .share-btn.signal-btn-s { background:linear-gradient(135deg,#3A76F0,#2C6BED); }
+        .share-btn.messenger-btn-s { background:linear-gradient(135deg,#00B2FF,#006AFF); }
+        .share-btn.sms-btn-s { background:linear-gradient(135deg,#4CAF50,#2E7D32); }
+        .share-btn.email-btn-s { background:linear-gradient(135deg,#FF6D00,#E65100); }
+        .share-btn-single { grid-column:1/-1; }
+        .telegram-settings { margin-top:12px; padding:12px; background:rgba(0,136,204,0.08); border:1px solid rgba(0,136,204,0.2); border-radius:12px; }
+        .telegram-settings input { width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--border-l);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:13px;outline:none;margin-bottom:10px; }
+        .alarm-platform-icon { font-size:11px; margin-left:4px; }
+        .panel-alarm-platform { font-size:10px; padding:2px 6px; border-radius:4px; background:rgba(255,255,255,0.08); color:var(--text-m); margin-left:auto; white-space:nowrap; }
+        .install-btn { width:32px; height:32px; border-radius:50%; border:2px solid var(--border-l); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:15px; transition:all 0.2s ease; background:var(--input-bg); color:var(--text-s); display:none; }
+        .install-btn:hover { transform:scale(1.1); border-color:var(--accent-border); color:var(--text); }
+    </style>
+</head>
+<body>
+    <div style="display:flex;flex-direction:column;align-items:center;">
+        <div class="view-toggle">
+            <button class="view-toggle-btn active" id="viewCalBtn" data-i18n="calendar">&#128197; Kalendar</button>
+            <button class="view-toggle-btn" id="viewNotesBtn" data-i18n="notesView">&#128221; Bele&#353;ke</button>
+        </div>
+
+        <div id="calendarView">
+            <div class="calendar">
+            <div class="calendar-header">
+                <div class="nav-buttons">
+                    <button class="nav-btn" id="prevMonth">&#8249;</button>
+                </div>
+                <h2 id="monthYear"></h2>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <button class="install-btn" id="installBtn" title="Instaliraj aplikaciju">&#10010;</button>
+                    <div class="lang-toggle">
+                        <button class="lang-btn" id="langBtn" title="Promeni jezik">SR</button>
+                        <div class="lang-dropdown" id="langDropdown"></div>
+                    </div>
+                    <div class="theme-toggle">
+                        <button class="theme-btn" id="themeBtn" title="Promeni temu">&#127912;</button>
+                        <div class="theme-dropdown" id="themeDropdown"></div>
+                    </div>
+                    <div class="nav-buttons">
+                        <button class="nav-btn" id="nextMonth">&#8250;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="weekdays">
+                <div class="weekday"></div><div class="weekday"></div><div class="weekday"></div>
+                <div class="weekday"></div><div class="weekday"></div><div class="weekday"></div><div class="weekday"></div>
+            </div>
+            <div class="days" id="daysContainer"></div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-dot today"></div><span data-i18n="today">Danas</span></div>
+                <div class="legend-item"><div class="legend-dot event"></div><span data-i18n="note">Beleška</span></div>
+                <div class="legend-item"><div class="legend-dot alarm"></div><span data-i18n="alarm">Alarm</span></div>
+            </div>
+        </div>
+        </div>
+        <div id="notesView" style="display:none;position:relative">
+            <div class="notes-container">
+                <div class="notes-grid" id="notesGrid"></div>
+            </div>
+            <button class="notes-fab" id="notesFab">+</button>
+        </div>
+        <div class="active-alarms-panel" id="alarmsPanel">
+            <div class="panel-header">
+                <h3><span data-i18n="reminders">Podsetnici</span> <span class="alarm-count-badge" id="alarmCount">0</span></h3>
+                <button class="panel-toggle" id="panelToggle" data-i18n="hide">Sakrij</button>
+            </div>
+            <div class="panel-alarms-list" id="alarmsList"></div>
+        </div>
+        <div class="ai-chat-panel" id="chatPanel">
+            <div class="chat-header">
+                <h3><span data-i18n="aiChat">AI Asistent</span>
+                    <select class="chat-provider-select" id="chatProvider">
+                        <option value="ollama">Ollama</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Claude</option>
+                        <option value="gemini">Gemini</option>
+                        <option value="openrouter">OpenRouter</option>
+                        <option value="kimi">Kimi</option>
+                    </select>
+                </h3>
+                <button class="chat-settings-btn" id="chatSettingsBtn" title="Postavke">&#9881;</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-empty" id="chatEmpty">
+                    <div class="chat-empty-icon">&#129302;</div>
+                    <div data-i18n="chatEmpty">Pitaj me da dodam belešku ili podsetnik.<br>Primer: "Sutra u 10h sastanak sa Markom"</div>
+                </div>
+            </div>
+            <div class="chat-input-row">
+                <button class="chat-mic-btn" id="chatMicBtn" title="Glasovni unos">&#127908;</button>
+                <textarea class="chat-input" id="chatInput" rows="1" data-i18n-ph="chatPH" placeholder="Napiši nešto..."></textarea>
+                <button class="chat-send-btn" id="chatSendBtn">&#10148;</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle"></h3>
+                <button class="modal-close" id="modalClose">&#10005;</button>
+            </div>
+            <div class="section-label" data-i18n="notes">Beleške</div>
+            <textarea id="noteInput" data-i18n-ph="notePH" placeholder="Unesite belešku..."></textarea>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="modalCancel" data-i18n="cancel">Otkaži</button>
+                <button class="modal-btn save" id="modalSave" data-i18n="save">Sačuvaj</button>
+            </div>
+            <div id="notesSection"></div>
+            <hr class="section-divider">
+            <div class="section-label" data-i18n="newAlarm">Novi alarm / podsetnik</div>
+            <div class="alarm-form">
+                <input type="time" id="alarmTime">
+                <input type="text" id="alarmText" data-i18n-ph="alarmPH" placeholder="Podsetnik...">
+                <button class="alarm-add-btn" id="alarmAddBtn">+</button>
+            </div>
+            <div class="section-label" style="margin-top:10px" data-i18n="alarmAction">Akcija podsetnika</div>
+            <div class="platform-selector" id="platformSelector">
+                <button class="platform-btn active" data-platform="none" data-i18n="platformNone">&#10005; Bez</button>
+                <button class="platform-btn" data-platform="viber">💬 Viber</button>
+                <button class="platform-btn" data-platform="whatsapp">💬 WhatsApp</button>
+                <button class="platform-btn" data-platform="telegram">✈️ Telegram</button>
+                <button class="platform-btn" data-platform="signal">🔒 Signal</button>
+                <button class="platform-btn" data-platform="messenger">💬 Messenger</button>
+                <button class="platform-btn" data-platform="sms">📱 SMS</button>
+                <button class="platform-btn" data-platform="email">📧 Email</button>
+            </div>
+            <div class="platform-fields" id="platformFields" style="display:none">
+                <input type="text" id="platformNumber" placeholder="broj/email...">
+                <input type="text" id="platformMsg" data-i18n-ph="msgPH" placeholder="poruka...">
+            </div>
+            <div id="alarmsSection"></div>
+        </div>
+    </div>
+    <div class="notification-toast" id="toast">
+        <div class="toast-icon">&#9200;</div>
+        <div class="toast-body">
+            <div class="toast-title" id="toastTitle">Alarm</div>
+            <div class="toast-message" id="toastMessage"></div>
+        </div>
+        <button class="toast-close" id="toastClose">&#10005;</button>
+    </div>
+    <div class="modal-overlay" id="settingsOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 data-i18n="aiSettings">Postavke AI-a</h3>
+                <button class="modal-close" id="settingsClose">&#10005;</button>
+            </div>
+            <div class="section-label" data-i18n="apiKeyLabel">API ključ (čuva se lokalno)</div>
+            <input type="password" id="apiKeyInput" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--border-l);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:13px;outline:none;margin-bottom:12px;" placeholder="sk-...">
+            <div class="section-label" data-i18n="ollamaUrl">Ollama URL</div>
+            <input type="text" id="ollamaUrlInput" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--border-l);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:13px;outline:none;margin-bottom:12px;" placeholder="http://localhost:11434">
+            <div class="section-label" data-i18n="modelName">Model</div>
+            <input type="text" id="modelNameInput" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--border-l);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:13px;outline:none;margin-bottom:12px;" placeholder="llama3">
+            <div class="telegram-settings">
+                <div class="section-label" data-i18n="telegramBot">Telegram Bot</div>
+                <input type="text" id="telegramTokenInput" placeholder="Bot Token...">
+                <input type="text" id="telegramChatIdInput" placeholder="Chat ID...">
+            </div>
+            <div class="section-label" data-i18n="systemPromptLabel">System Prompt (prilagodi AI ponašanje)</div>
+            <textarea id="systemPromptInput" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--border-l);background:var(--input-bg);color:var(--text);font-family:monospace;font-size:11px;outline:none;margin-bottom:12px;resize:vertical;min-height:120px;" data-i18n-ph="systemPromptPH" placeholder="Ostavi prazno za podrazumevani prompt..."></textarea>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="settingsCancelBtn" data-i18n="cancel">Otkaži</button>
+                <button class="modal-btn save" id="settingsSaveBtn" data-i18n="save">Sačuvaj</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="noteEditorOverlay">
+        <div class="modal" style="max-height:90vh">
+            <div class="modal-header">
+                <h3 id="noteEditorTitle" data-i18n="newNote">Nova beleška</h3>
+                <button class="modal-close" id="noteEditorClose">&#10005;</button>
+            </div>
+            <div class="note-editor">
+                <input class="note-editor-title" id="noteTitleInput" data-i18n-ph="noteTitlePH" placeholder="Naslov...">
+                <div class="note-type-toggle">
+                    <button class="note-type-btn active" id="noteTypeText" data-i18n="noteTypeText">&#128221; Tekst</button>
+                    <button class="note-type-btn" id="noteTypeCheck" data-i18n="noteTypeCheck">&#9745; Čeklista</button>
+                </div>
+                <div id="noteTextSection">
+                    <textarea class="note-editor-text" id="noteContentInput" data-i18n-ph="noteContentPH" placeholder="Sadržaj beleške..."></textarea>
+                </div>
+                <div id="noteCheckSection" style="display:none">
+                    <div class="checklist-editor" id="checklistEditor"></div>
+                    <button class="checklist-add" id="checklistAddBtn">+ Stavka</button>
+                </div>
+                <div class="section-label" data-i18n="noteColor">Boja</div>
+                <div class="color-picker" id="noteColorPicker"></div>
+                <div class="note-lock-row">
+                    <span>&#128274;</span>
+                    <label data-i18n="noteLock">Zaključaj sa PIN-om</label>
+                    <label class="toggle-switch"><input type="checkbox" id="noteLockToggle"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="note-editor-actions">
+                    <button class="modal-btn cancel" id="noteDeleteBtn" data-i18n="delete">Obriši</button>
+                    <button class="modal-btn cancel" id="noteEditorCancel" data-i18n="cancel">Otkaži</button>
+                    <button class="modal-btn save" id="noteEditorSave" data-i18n="save">Sačuvaj</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="pinOverlay">
+        <div class="modal" style="width:300px">
+            <div class="modal-header">
+                <h3 id="pinTitle" data-i18n="enterPin">Unesi PIN</h3>
+                <button class="modal-close" id="pinClose">&#10005;</button>
+            </div>
+            <div class="pin-entry">
+                <div class="pin-dots" id="pinDots">
+                    <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+                </div>
+                <div class="pin-keypad" id="pinKeypad">
+                    <button class="pin-key" data-val="1">1</button>
+                    <button class="pin-key" data-val="2">2</button>
+                    <button class="pin-key" data-val="3">3</button>
+                    <button class="pin-key" data-val="4">4</button>
+                    <button class="pin-key" data-val="5">5</button>
+                    <button class="pin-key" data-val="6">6</button>
+                    <button class="pin-key" data-val="7">7</button>
+                    <button class="pin-key" data-val="8">8</button>
+                    <button class="pin-key" data-val="9">9</button>
+                    <button class="pin-key del" data-val="del">&#9003;</button>
+                    <button class="pin-key" data-val="0">0</button>
+                    <button class="pin-key ok" data-val="ok">&#10003;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="reminder-popup" id="reminderPopup">
+        <div class="reminder-card">
+            <div class="reminder-icon" id="reminderIcon">&#9200;</div>
+            <div class="reminder-time" id="reminderTime"></div>
+            <div class="reminder-text" id="reminderText"></div>
+            <div class="reminder-actions" id="reminderActions"></div>
+        </div>
+    </div>
+    <script>
+        const LANG_KEY = 'calendarLang';
+        const langDefs = {
+            sr: { flag:'🇷🇸', label:'Srpski', months:['Januar','Februar','Mart','April','Maj','Jun','Jul','Avgust','Septembar','Oktobar','Novembar','Decembar'], weekdays:['Pon','Uto','Sri','Čet','Pet','Sub','Ned'], today:'Danas', note:'Beleška', alarm:'Alarm', notes:'Beleške', notePH:'Unesite belešku...', cancel:'Otkaži', save:'Sačuvaj', savedNotes:'Sačuvane beleške', newAlarm:'Novi alarm / podsetnik', alarmPH:'Podsetnik...', existingAlarms:'Postojeći alarmi', noAlarmsDay:'Nema alarma za ovaj dan', reminders:'Podsetnici', hide:'Sakrij', show:'Prikaži', noActiveReminders:'Nema aktivnih podsetnika', alarmTitle:'Alarm', updated:'Ažurirano', newVersion:'Nova verzija aplikacije je dostupna.', themes:'Teme', aiChat:'AI Asistent', chatEmpty:'Pitaj me da dodam belešku, podsetnik ili pošaljem poruku.<br>Primer: "Pošalji SMS sestri: Stižem za 10 minuta"', chatPH:'Napiši nešto...', aiSettings:'Postavke AI-a', apiKeyLabel:'API ključ (čuva se lokalno)', ollamaUrl:'Ollama URL', modelName:'Model', saved:'Sačuvano', actionNote:'Beleška dodata', actionAlarm:'Podsetnik postavljen', actionSend:'Poruka poslata', actionList:'Pronađeno', thinking:'Razmišljam...', errorAPI:'Greška pri povezivanju sa AI-jem', errorParse:'Nije moguće interpretirati odgovor', calendar:'Kalendar', notesView:'Beleške', newNote:'Nova beleška', noteTitlePH:'Naslov...', noteContentPH:'Sadržaj beleške...', noteTypeText:'Tekst', noteTypeCheck:'Čeklista', noteColor:'Boja', noteLock:'Zaključaj sa PIN-om', delete:'Obriši', enterPin:'Unesi PIN', wrongPin:'Pogrešan PIN', setPin:'Postavi PIN', changePin:'Promeni PIN', locked:'Zaključano', dismiss:'Odbaci', alarmAction:'Akcija podsetnika', platformNone:'Bez', msgPH:'poruka...', telegramBot:'Telegram Bot', send:'Pošalji', installDone:'Aplikacija instalirana', promptTitle:'Brzo slanje', gpContactPH:'broj / email...', gpMsgPH:'poruka...', gpEmptyMsg:'Unesite poruku', gpSelectPlatform:'Izaberite platformu', gpEmptyContact:'Unesite kontakt', gpSent:'poslato', systemPromptLabel:'System Prompt (prilagodi AI pona&#353;anje)', systemPromptPH:'Ostavi prazno za podrazumevani prompt...' },
+            en: { flag:'🇬🇧', label:'English', months:['January','February','March','April','May','June','July','August','September','October','November','December'], weekdays:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], today:'Today', note:'Note', alarm:'Alarm', notes:'Notes', notePH:'Enter a note...', cancel:'Cancel', save:'Save', savedNotes:'Saved notes', newAlarm:'New alarm / reminder', alarmPH:'Reminder...', existingAlarms:'Existing alarms', noAlarmsDay:'No alarms for this day', reminders:'Reminders', hide:'Hide', show:'Show', noActiveReminders:'No active reminders', alarmTitle:'Alarm', updated:'Updated', newVersion:'New app version available.', themes:'Themes', aiChat:'AI Assistant', chatEmpty:'Ask me to add a note, set a reminder, or send a message.<br>Example: "Send SMS to sister: Coming in 10 minutes"', chatPH:'Type something...', aiSettings:'AI Settings', apiKeyLabel:'API Key (stored locally)', ollamaUrl:'Ollama URL', modelName:'Model', saved:'Saved', actionNote:'Note added', actionAlarm:'Reminder set', actionSend:'Message sent', actionList:'Found', thinking:'Thinking...', errorAPI:'Error connecting to AI', errorParse:'Could not interpret response', calendar:'Calendar', notesView:'Notes', newNote:'New note', noteTitlePH:'Title...', noteContentPH:'Note content...', noteTypeText:'Text', noteTypeCheck:'Checklist', noteColor:'Color', noteLock:'Lock with PIN', delete:'Delete', enterPin:'Enter PIN', wrongPin:'Wrong PIN', setPin:'Set PIN', changePin:'Change PIN', locked:'Locked', dismiss:'Dismiss', alarmAction:'Reminder action', platformNone:'None', msgPH:'message...', telegramBot:'Telegram Bot', send:'Send', installDone:'App installed', promptTitle:'Quick Send', gpContactPH:'number / email...', gpMsgPH:'message...', gpEmptyMsg:'Enter a message', gpSelectPlatform:'Select a platform', gpEmptyContact:'Enter a contact', gpSent:'sent', systemPromptLabel:'System Prompt (customize AI behavior)', systemPromptPH:'Leave empty for default prompt...' },
+            de: { flag:'🇩🇪', label:'Deutsch', months:['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'], weekdays:['Mo','Di','Mi','Do','Fr','Sa','So'], today:'Heute', note:'Notiz', alarm:'Wecker', notes:'Notizen', notePH:'Notiz eingeben...', cancel:'Abbrechen', save:'Speichern', savedNotes:'Gespeicherte Notizen', newAlarm:'Neuer Wecker / Erinnerung', alarmPH:'Erinnerung...', existingAlarms:'Vorhandene Wecker', noAlarmsDay:'Keine Wecker an diesem Tag', reminders:'Erinnerungen', hide:'Ausblenden', show:'Anzeigen', noActiveReminders:'Keine aktiven Erinnerungen', alarmTitle:'Wecker', updated:'Aktualisiert', newVersion:'Neue App-Version verfügbar.', themes:'Themen', aiChat:'KI-Assistent', chatEmpty:'Fragen Sie mich, eine Notiz hinzuzufügen, eine Erinnerung zu setzen oder eine Nachricht zu senden.<br>Beispiel: "SMS an Schwester senden: Komme in 10 Minuten"', chatPH:'Etwas schreiben...', aiSettings:'KI-Einstellungen', apiKeyLabel:'API-Schlüssel (lokal gespeichert)', ollamaUrl:'Ollama URL', modelName:'Modell', saved:'Gespeichert', actionNote:'Notiz hinzugefügt', actionAlarm:'Erinnerung gesetzt', actionSend:'Nachricht gesendet', actionList:'Gefunden', thinking:'Nachdenken...', errorAPI:'Fehler bei der Verbindung mit KI', errorParse:'Antwort konnte nicht interpretiert werden', calendar:'Kalender', notesView:'Notizen', newNote:'Neue Notiz', noteTitlePH:'Titel...', noteContentPH:'Notizinhalt...', noteTypeText:'Text', noteTypeCheck:'Checkliste', noteColor:'Farbe', noteLock:'Mit PIN sperren', delete:'Löschen', enterPin:'PIN eingeben', wrongPin:'Falsche PIN', setPin:'PIN festlegen', changePin:'PIN ändern', locked:'Gesperrt', dismiss:'Verwerfen', alarmAction:'Erinnerungsaktion', platformNone:'Keine', msgPH:'Nachricht...', telegramBot:'Telegram Bot', send:'Senden', installDone:'App installiert', promptTitle:'Schnell senden', gpContactPH:'Nummer / E-Mail...', gpMsgPH:'Nachricht...', gpEmptyMsg:'Nachricht eingeben', gpSelectPlatform:'Plattform wählen', gpEmptyContact:'Kontakt eingeben', gpSent:'gesendet', systemPromptLabel:'System-Prompt (KI-Verhalten anpassen)', systemPromptPH:'Leer für Standard-Prompt lassen...' },
+            fr: { flag:'🇫🇷', label:'Français', months:['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'], weekdays:['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'], today:"Aujourd'hui", note:'Note', alarm:'Alarme', notes:'Notes', notePH:'Entrez une note...', cancel:'Annuler', save:'Enregistrer', savedNotes:'Notes enregistrées', newAlarm:'Nouvel alarme / rappel', alarmPH:'Rappel...', existingAlarms:'Alarmes existantes', noAlarmsDay:"Pas d'alarme ce jour", reminders:'Rappels', hide:'Masquer', show:'Afficher', noActiveReminders:'Aucun rappel actif', alarmTitle:'Alarme', updated:'Mis à jour', newVersion:'Nouvelle version de l\'app disponible.', themes:'Thèmes', aiChat:'Assistant IA', chatEmpty:'Demandez-moi d\'ajouter une note, un rappel, ou d\'envoyer un message.<br>Exemple: "Envoie un SMS à ma sœur: J\'arrive dans 10 minutes"', chatPH:'Écrivez quelque chose...', aiSettings:'Paramètres IA', apiKeyLabel:'Clé API (stockée localement)', ollamaUrl:'URL Ollama', modelName:'Modèle', saved:'Enregistré', actionNote:'Note ajoutée', actionAlarm:'Rappel défini', actionSend:'Message envoyé', actionList:'Trouvé', thinking:'Réflexion...', errorAPI:'Erreur de connexion à l\'IA', errorParse:'Impossible d\'interpréter la réponse', calendar:'Calendrier', notesView:'Notes', newNote:'Nouvelle note', noteTitlePH:'Titre...', noteContentPH:'Contenu de la note...', noteTypeText:'Texte', noteTypeCheck:'Liste', noteColor:'Couleur', noteLock:'Verrouiller avec PIN', delete:'Supprimer', enterPin:'Entrer le PIN', wrongPin:'Mauvais PIN', setPin:'Définir le PIN', changePin:'Changer le PIN', locked:'Verrouillé', dismiss:'Ignorer', alarmAction:'Action de rappel', platformNone:'Aucun', msgPH:'message...', telegramBot:'Bot Telegram', send:'Envoyer', installDone:'Application installée', promptTitle:'Envoi rapide', gpContactPH:'numéro / e-mail...', gpMsgPH:'message...', gpEmptyMsg:'Entrez un message', gpSelectPlatform:'Choisir une plateforme', gpEmptyContact:'Entrez un contact', gpSent:'envoyé', systemPromptLabel:'System Prompt (personnaliser le comportement IA)', systemPromptPH:'Laisser vide pour le prompt par défaut...' },
+            es: { flag:'🇪🇸', label:'Español', months:['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'], weekdays:['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'], today:'Hoy', note:'Nota', alarm:'Alarma', notes:'Notas', notePH:'Escribe una nota...', cancel:'Cancelar', save:'Guardar', savedNotes:'Notas guardadas', newAlarm:'Nueva alarma / recordatorio', alarmPH:'Recordatorio...', existingAlarms:'Alarmas existentes', noAlarmsDay:'Sin alarmas este día', reminders:'Recordatorios', hide:'Ocultar', show:'Mostrar', noActiveReminders:'Sin recordatorios activos', alarmTitle:'Alarma', updated:'Actualizado', newVersion:'Nueva versión de la app disponible.', themes:'Temas', aiChat:'Asistente IA', chatEmpty:'Pídeme que agregue una nota, configure un recordatorio o envíe un mensaje.<br>Ejemplo: "Envía un SMS a mi hermana: Llego en 10 minutos"', chatPH:'Escribe algo...', aiSettings:'Configuración de IA', apiKeyLabel:'Clave API (almacenada localmente)', ollamaUrl:'URL de Ollama', modelName:'Modelo', saved:'Guardado', actionNote:'Nota agregada', actionAlarm:'Recordatorio configurado', actionSend:'Mensaje enviado', actionList:'Encontrado', thinking:'Pensando...', errorAPI:'Error al conectar con la IA', errorParse:'No se pudo interpretar la respuesta', calendar:'Calendario', notesView:'Notas', newNote:'Nueva nota', noteTitlePH:'Título...', noteContentPH:'Contenido de la nota...', noteTypeText:'Texto', noteTypeCheck:'Lista', noteColor:'Color', noteLock:'Bloquear con PIN', delete:'Eliminar', enterPin:'Ingresar PIN', wrongPin:'PIN incorrecto', setPin:'Establecer PIN', changePin:'Cambiar PIN', locked:'Bloqueado', dismiss:'Descartar', alarmAction:'Acción de recordatorio', platformNone:'Ninguno', msgPH:'mensaje...', telegramBot:'Bot de Telegram', send:'Enviar', installDone:'Aplicación instalada', promptTitle:'Envío rápido', gpContactPH:'número / email...', gpMsgPH:'mensaje...', gpEmptyMsg:'Escribe un mensaje', gpSelectPlatform:'Elige una plataforma', gpEmptyContact:'Ingresa un contacto', gpSent:'enviado', systemPromptLabel:'System Prompt (personalizar comportamiento IA)', systemPromptPH:'Dejar vacío para el prompt predeterminado...' },
+            it: { flag:'🇮🇹', label:'Italiano', months:['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'], weekdays:['Lun','Mar','Mer','Gio','Ven','Sab','Dom'], today:'Oggi', note:'Nota', alarm:'Sveglia', notes:'Note', notePH:'Inserisci una nota...', cancel:'Annulla', save:'Salva', savedNotes:'Note salvate', newAlarm:'Nuova sveglia / promemoria', alarmPH:'Promemoria...', existingAlarms:'Sveglie esistenti', noAlarmsDay:'Nessuna sveglia questo giorno', reminders:'Promemoria', hide:'Nascondi', show:'Mostra', noActiveReminders:'Nessun promemoria attivo', alarmTitle:'Sveglia', updated:'Aggiornato', newVersion:'Nuova versione dell\'app disponibile.', themes:'Temi', aiChat:'Assistente IA', chatEmpty:'Chiedimi di aggiungere una nota, impostare un promemoria o inviare un messaggio.<br>Esempio: "Invia un SMS a mia sorella: Arrivo tra 10 minuti"', chatPH:'Scrivi qualcosa...', aiSettings:'Impostazioni IA', apiKeyLabel:'Chiave API (salvata localmente)', ollamaUrl:'URL Ollama', modelName:'Modello', saved:'Salvato', actionNote:'Nota aggiunta', actionAlarm:'Promemoria impostato', actionSend:'Messaggio inviato', actionList:'Trovato', thinking:'Riflessione...', errorAPI:'Errore di connessione all\'IA', errorParse:'Impossibile interpretare la risposta', calendar:'Calendario', notesView:'Note', newNote:'Nuova nota', noteTitlePH:'Titolo...', noteContentPH:'Contenuto della nota...', noteTypeText:'Testo', noteTypeCheck:'Lista', noteColor:'Colore', noteLock:'Blocca con PIN', delete:'Elimina', enterPin:'Inserisci PIN', wrongPin:'PIN errato', setPin:'Imposta PIN', changePin:'Cambia PIN', locked:'Bloccato', dismiss:'Ignora', alarmAction:'Azione promemoria', platformNone:'Nessuno', msgPH:'messaggio...', telegramBot:'Bot Telegram', send:'Invia', installDone:'App installata', promptTitle:'Invio rapido', gpContactPH:'numero / email...', gpMsgPH:'messaggio...', gpEmptyMsg:'Scrivi un messaggio', gpSelectPlatform:'Scegli una piattaforma', gpEmptyContact:'Inserisci un contatto', gpSent:'inviato', systemPromptLabel:'System Prompt (personalizza comportamento IA)', systemPromptPH:'Lascia vuoto per il prompt predefinito...' },
+            pt: { flag:'🇵🇹', label:'Português', months:['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'], weekdays:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'], today:'Hoje', note:'Nota', alarm:'Alarme', notes:'Notas', notePH:'Escreva uma nota...', cancel:'Cancelar', save:'Salvar', savedNotes:'Notas salvas', newAlarm:'Novo alarme / lembrete', alarmPH:'Lembrete...', existingAlarms:'Alarmes existentes', noAlarmsDay:'Sem alarmes neste dia', reminders:'Lembretes', hide:'Ocultar', show:'Mostrar', noActiveReminders:'Sem lembretes ativos', alarmTitle:'Alarme', updated:'Atualizado', newVersion:'Nova versão do app disponível.', themes:'Temas', aiChat:'Assistente IA', chatEmpty:'Peça-me para adicionar uma nota, definir um lembrete ou enviar uma mensagem.<br>Exemplo: "Envie um SMS para minha irmã: Chego em 10 minutos"', chatPH:'Escreva algo...', aiSettings:'Configurações de IA', apiKeyLabel:'Chave API (armazenada localmente)', ollamaUrl:'URL do Ollama', modelName:'Modelo', saved:'Salvo', actionNote:'Nota adicionada', actionAlarm:'Lembrete definido', actionSend:'Mensagem enviada', actionList:'Encontrado', thinking:'Pensando...', errorAPI:'Erro ao conectar com a IA', errorParse:'Não foi possível interpretar a resposta', calendar:'Calendário', notesView:'Notas', newNote:'Nova nota', noteTitlePH:'Título...', noteContentPH:'Conteúdo da nota...', noteTypeText:'Texto', noteTypeCheck:'Lista', noteColor:'Cor', noteLock:'Bloquear com PIN', delete:'Excluir', enterPin:'Inserir PIN', wrongPin:'PIN incorreto', setPin:'Definir PIN', changePin:'Alterar PIN', locked:'Bloqueado', dismiss:'Dispensar', alarmAction:'Ação de lembrete', platformNone:'Nenhum', msgPH:'mensagem...', telegramBot:'Bot Telegram', send:'Enviar', installDone:'Aplicação instalada', promptTitle:'Envio rápido', gpContactPH:'número / email...', gpMsgPH:'mensagem...', gpEmptyMsg:'Digite uma mensagem', gpSelectPlatform:'Escolha uma plataforma', gpEmptyContact:'Digite um contato', gpSent:'enviado', systemPromptLabel:'System Prompt (personalizar comportamento da IA)', systemPromptPH:'Deixe vazio para o prompt padrão...' },
+            sv: { flag:'🇸🇪', label:'Svenska', months:['Januari','Februari','Mars','April','Maj','Juni','Juli','Augusti','September','Oktober','November','December'], weekdays:['Mån','Tis','Ons','Tor','Fre','Lör','Sön'], today:'Idag', note:'Anteckning', alarm:'Väckarklocka', notes:'Anteckningar', notePH:'Skriv en anteckning...', cancel:'Avbryt', save:'Spara', savedNotes:'Sparade anteckningar', newAlarm:'Ny väcka / påminnelse', alarmPH:'Påminnelse...', existingAlarms:'Befintliga väckor', noAlarmsDay:'Inga väckor denna dag', reminders:'Påminnelser', hide:'Dölj', show:'Visa', noActiveReminders:'Inga aktiva påminnelser', alarmTitle:'Väcka', updated:'Uppdaterad', newVersion:'Ny appversion tillgänglig.', themes:'Teman', aiChat:'AI-assistent', chatEmpty:'Be mig lägga till en anteckning, ställa en påminnelse eller skicka ett meddelande.<br>Exempel: "Skicka SMS till syster: Kommer om 10 minuter"', chatPH:'Skriv något...', aiSettings:'AI-inställningar', apiKeyLabel:'API-nyckel (lagras lokalt)', ollamaUrl:'Ollama URL', modelName:'Modell', saved:'Sparat', actionNote:'Anteckning tillagd', actionAlarm:'Påminnelse satt', actionSend:'Meddelande skickat', actionList:'Hittad', thinking:'Tänker...', errorAPI:'Fel vid anslutning till AI', errorParse:'Kunde inte tolka svaret', calendar:'Kalender', notesView:'Anteckningar', newNote:'Ny anteckning', noteTitlePH:'Titel...', noteContentPH:'Anteckningsinnehåll...', noteTypeText:'Text', noteTypeCheck:'Checklista', noteColor:'Färg', noteLock:'Lås med PIN', delete:'Ta bort', enterPin:'Ange PIN', wrongPin:'Fel PIN', setPin:'Ange PIN', changePin:'Ändra PIN', locked:'Låst', dismiss:'Avfärda', alarmAction:'Påminnelseåtgärd', platformNone:'Ingen', msgPH:'meddelande...', telegramBot:'Telegram Bot', send:'Skicka', installDone:'Appen installerad', promptTitle:'Snabbt skicka', gpContactPH:'nummer / e-post...', gpMsgPH:'meddelande...', gpEmptyMsg:'Skriv ett meddelande', gpSelectPlatform:'Välj plattform', gpEmptyContact:'Ange en kontakt', gpSent:'skickat', systemPromptLabel:'System Prompt (anpassa AI-beteende)', systemPromptPH:'Lämna tomt för standardprompt...' },
+            fi: { flag:'🇫🇮', label:'Suomi', months:['Tammikuu','Helmikuu','Maaliskuu','H Huhtikuu','Toukokuu','Kesäkuu','Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu'], weekdays:['Ma','Ti','Ke','To','Pe','La','Su'], today:'Tänään', note:'Muistiinpano', alarm:'Herätys', notes:'Muistiinpanot', notePH:'Kirjoita muistiinpano...', cancel:'Peruuta', save:'Tallenna', savedNotes:'Tallennetut muistiinpanot', newAlarm:'Uusi herätys / muistutus', alarmPH:'Muistutus...', existingAlarms:'Olemassa olevat herätykset', noAlarmsDay:'Ei herätyksiä tänä päivänä', reminders:'Muistutukset', hide:'Piilota', show:'Näytä', noActiveReminders:'Ei aktiivisia muistutuksia', alarmTitle:'Herätys', updated:'Päivitetty', newVersion:'Uusi sovellusversio saatavilla.', themes:'Teemat', aiChat:'AI-avustaja', chatEmpty:'Pyydä minua lisäämään muistiinpano, asettamaan muistutuksen tai lähettämään viestin.<br>Esimerkki: "Lähetä SMS siskolle: Saavun 10 minuutissa"', chatPH:'Kirjoita jotain...', aiSettings:'AI-asetukset', apiKeyLabel:'API-avain (tallennetaan paikallisesti)', ollamaUrl:'Ollama URL', modelName:'Malli', saved:'Tallennettu', actionNote:'Muistiinpano lisätty', actionAlarm:'Muistutus asetettu', actionSend:'Viesti lähetetty', actionList:'Löydetty', thinking:'Ajattelen...', errorAPI:'Virhe AI-yhdistämisessä', errorParse:'Vastausta ei voitu tulkita', calendar:'Kalenteri', notesView:'Muistiinpanot', newNote:'Uusi muistiinpano', noteTitlePH:'Otsikko...', noteContentPH:'Muistiinpanon sisältö...', noteTypeText:'Teksti', noteTypeCheck:'Lista', noteColor:'Väri', noteLock:'Lukitse PIN-koodilla', delete:'Poista', enterPin:'Syötä PIN', wrongPin:'Väärä PIN', setPin:'Aseta PIN', changePin:'Vaihda PIN', locked:'Lukittu', dismiss:'Hylkää', alarmAction:'Muistutustoiminto', platformNone:'Ei mitään', msgPH:'viesti...', telegramBot:'Telegram Bot', send:'Lähetä', installDone:'Sovellus asennettu', promptTitle:'Pikälähetys', gpContactPH:'numero / sähköposti...', gpMsgPH:'viesti...', gpEmptyMsg:'Kirjoita viesti', gpSelectPlatform:'Valitse alusta', gpEmptyContact:'Syötä yhteystieto', gpSent:'lähetetty', systemPromptLabel:'System Prompt (muokkaa AI:n käyttäytymistä)', systemPromptPH:'Jätä tyhjäksi oletuskehotteelle...' },
+            pl: { flag:'🇵🇱', label:'Polski', months:['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'], weekdays:['Pon','Wt','Śr','Czw','Pt','Sob','Ndz'], today:'Dziś', note:'Notatka', alarm:'Budzik', notes:'Notatki', notePH:'Wpisz notatkę...', cancel:'Anuluj', save:'Zapisz', savedNotes:'Zapisane notatki', newAlarm:'Nowy budzik / przypomnienie', alarmPH:'Przypomnienie...', existingAlarms:'Istniejące budziki', noAlarmsDay:'Brak budzików tego dnia', reminders:'Przypomnienia', hide:'Ukryj', show:'Pokaż', noActiveReminders:'Brak aktywnych przypomnień', alarmTitle:'Budzik', updated:'Zaktualizowano', newVersion:'Dostępna nowa wersja aplikacji.', themes:'Motywy', aiChat:'Asystent AI', chatEmpty:'Poproś mnie o dodanie notatki, ustawienie przypomnienia lub wysłanie wiadomości.<br>Przykład: "Wyślij SMS do siostry: Przyjadę za 10 minut"', chatPH:'Napisz coś...', aiSettings:'Ustawienia AI', apiKeyLabel:'Klucz API (przechowywany lokalnie)', ollamaUrl:'URL Ollama', modelName:'Model', saved:'Zapisano', actionNote:'Notatka dodana', actionAlarm:'Przypomnienie ustawione', actionSend:'Wiadomość wysłana', actionList:'Znaleziono', thinking:'Myślę...', errorAPI:'Błąd połączenia z AI', errorParse:'Nie udało się zinterpretować odpowiedzi', calendar:'Kalendarz', notesView:'Notatki', newNote:'Nowa notatka', noteTitlePH:'Tytuł...', noteContentPH:'Treść notatki...', noteTypeText:'Tekst', noteTypeCheck:'Lista', noteColor:'Kolor', noteLock:'Zablokuj PIN-em', delete:'Usuń', enterPin:'Wprowadź PIN', wrongPin:'Błędny PIN', setPin:'Ustaw PIN', changePin:'Zmień PIN', locked:'Zablokowane', dismiss:'Odrzuć', alarmAction:'Akcja przypomnienia', platformNone:'Brak', msgPH:'wiadomość...', telegramBot:'Bot Telegram', send:'Wyślij', installDone:'Aplikacja zainstalowana', promptTitle:'Szybkie wysyłanie', gpContactPH:'numer / email...', gpMsgPH:'wiadomość...', gpEmptyMsg:'Wpisz wiadomość', gpSelectPlatform:'Wybierz platformę', gpEmptyContact:'Wpisz kontakt', gpSent:'wysłano', systemPromptLabel:'System Prompt (dostosuj zachowanie AI)', systemPromptPH:'Pozostaw puste dla domyślnego promptu...' },
+            cs: { flag:'🇨🇿', label:'Čeština', months:['Leden','Únor','Březen','Duben','Květen','Červen','Červenec','Srpen','Září','Říjen','Listopad','Prosinec'], weekdays:['Po','Út','St','Čt','Pá','So','Ne'], today:'Dnes', note:'Poznámka', alarm:'Budík', notes:'Poznámky', notePH:'Napište poznámku...', cancel:'Zrušit', save:'Uložit', savedNotes:'Uložené poznámky', newAlarm:'Nový budík / připomínka', alarmPH:'Připomínka...', existingAlarms:'Existující budíky', noAlarmsDay:'Žádné budíky tento den', reminders:'Připomínky', hide:'Skrýt', show:'Zobrazit', noActiveReminders:'Žádné aktivní připomínky', alarmTitle:'Budík', updated:'Aktualizováno', newVersion:'K dispozici nová verze aplikace.', themes:'Motivy', aiChat:'AI asistent', chatEmpty:'Požádejte mě o přidání poznámky, nastavení připomínky nebo odeslání zprávy.<br>Příklad: "Pošli SMS sestře: Přijedu za 10 minut"', chatPH:'Napište něco...', aiSettings:'Nastavení AI', apiKeyLabel:'API klíč (uložen lokálně)', ollamaUrl:'Ollama URL', modelName:'Model', saved:'Uloženo', actionNote:'Poznámka přidána', actionAlarm:'Připomínka nastavena', actionSend:'Zpráva odeslána', actionList:'Nalezeno', thinking:'Přemýšlím...', errorAPI:'Chyba připojení k AI', errorParse:'Nelze interpretovat odpověď', calendar:'Kalendář', notesView:'Poznámky', newNote:'Nová poznámka', noteTitlePH:'Název...', noteContentPH:'Obsah poznámky...', noteTypeText:'Text', noteTypeCheck:'Seznam', noteColor:'Barva', noteLock:'Uzamknout PINem', delete:'Smazat', enterPin:'Zadejte PIN', wrongPin:'Špatný PIN', setPin:'Nastavit PIN', changePin:'Změnit PIN', locked:'Uzamčeno', dismiss:'Zahodit', alarmAction:'Akce připomínky', platformNone:'Žádná', msgPH:'zpráva...', telegramBot:'Telegram Bot', send:'Odeslat', installDone:'Aplikace nainstalována', promptTitle:'Rychlé odeslání', gpContactPH:'číslo / email...', gpMsgPH:'zpráva...', gpEmptyMsg:'Napište zprávu', gpSelectPlatform:'Vyberte platformu', gpEmptyContact:'Zadejte kontakt', gpSent:'odesláno', systemPromptLabel:'System Prompt (přizpůsobit chování AI)', systemPromptPH:'Ponechte prázdné pro výchozí prompt...' },
+            ro: { flag:'🇷🇴', label:'Română', months:['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'], weekdays:['Lun','Mar','Mie','Joi','Vin','Sâm','Dum'], today:'Astăzi', note:'Notă', alarm:'Alarmă', notes:'Notări', notePH:'Introduceți o notă...', cancel:'Anulare', save:'Salvare', savedNotes:'Notări salvate', newAlarm:'Alarma nouă / memento', alarmPH:'Memento...', existingAlarms:'Alarme existente', noAlarmsDay:'Fără alarme în această zi', reminders:'Mementouri', hide:'Ascunde', show:'Afișează', noActiveReminders:'Fără mementouri active', alarmTitle:'Alarmă', updated:'Actualizat', newVersion:'Nouă versiune a aplicației disponibilă.', themes:'Teme', aiChat:'Asistent AI', chatEmpty:'Cereți-mi să adaug o notă, să setez un memento sau să trimit un mesaj.<br>Exemplu: „Trimite SMS surorii: Ajung în 10 minute"', chatPH:'Scrieți ceva...', aiSettings:'Setări AI', apiKeyLabel:'Cheie API (stocată local)', ollamaUrl:'URL Ollama', modelName:'Model', saved:'Salvat', actionNote:'Notă adăugată', actionAlarm:'Memento setat', actionSend:'Mesaj trimis', actionList:'Găsit', thinking:'Gândesc...', errorAPI:'Eroare la conectarea la AI', errorParse:'Nu s-a putut interpreta răspunsul', calendar:'Calendar', notesView:'Notițe', newNote:'Notiță nouă', noteTitlePH:'Titlu...', noteContentPH:'Conținut notiță...', noteTypeText:'Text', noteTypeCheck:'Listă', noteColor:'Culoare', noteLock:'Blochează cu PIN', delete:'Șterge', enterPin:'Introdu PIN', wrongPin:'PIN greșit', setPin:'Setează PIN', changePin:'Schimbă PIN', locked:'Blocat', dismiss:'Ignoră', alarmAction:'Acțiune memento', platformNone:'Niciunul', msgPH:'mesaj...', telegramBot:'Bot Telegram', send:'Trimite', installDone:'Aplicație instalată', promptTitle:'Trimite rapid', gpContactPH:'număr / email...', gpMsgPH:'mesaj...', gpEmptyMsg:'Introduceți un mesaj', gpSelectPlatform:'Alegeți o platformă', gpEmptyContact:'Introduceți un contact', gpSent:'trimis', systemPromptLabel:'System Prompt (personalizează comportamentul AI)', systemPromptPH:'Lasă gol pentru promptul implicit...' },
+            el: { flag:'🇬🇷', label:'Ελληνικά', months:['Ιανουάριος','Φεβρουάριος','Μάρτιος','Απρίλιος','Μάιος','Ιούνιος','Ιούλιος','Αύγουστος','Σεπτέμβριος','Οκτώβριος','Νοέμβριος','Δεκέμβριος'], weekdays:['Δευ','Τρί','Τετ','Πέμ','Παρ','Σαβ','Κυρ'], today:'Σήμερα', note:'Σημείωση', alarm:'Ξυπνητήρι', notes:'Σημειώσεις', notePH:'Πληκτρολογήστε σημείωση...', cancel:'Ακύρωση', save:'Αποθήκευση', savedNotes:'Αποθηκευμένες σημειώσεις', newAlarm:'Νέο ξυπνητήρι / υπενθύμιση', alarmPH:'Υπενθύμιση...', existingAlarms:'Υπάρχοντα ξυπνητήρια', noAlarmsDay:'Χωρίς ξυπνητήρια σήμερα', reminders:'Υπενθυμίσεις', hide:'Απόκρυψη', show:'Εμφάνιση', noActiveReminders:'Χωρίς ενεργές υπενθυμίσεις', alarmTitle:'Ξυπνητήρι', updated:'Ενημερώθηκε', newVersion:'Νέα έκδοση εφαρμογής διαθέσιμη.', themes:'Θέματα', aiChat:'Βοηθός AI', chatEmpty:'Ζητήστε να προσθέσω σημείωση, να ορίσω υπενθύμιση ή να στείλω μήνυμα.<br>Παράδειγμα: "Στείλε SMS στην αδερφή: Φτάνω σε 10 λεπτά"', chatPH:'Πληκτρολογήστε κάτι...', aiSettings:'Ρυθμίσεις AI', apiKeyLabel:'Κλειδί API (αποθηκεύεται τοπικά)', ollamaUrl:'URL Ollama', modelName:'Μοντέλο', saved:'Αποθηκεύτηκε', actionNote:'Σημείωση προστέθηκε', actionAlarm:'Υπενθύμιση ορίστηκε', actionSend:'Μήνυμα στάλθηκε', actionList:'Βρέθηκε', thinking:'Σκέφτομαι...', errorAPI:'Σφάλμα σύνδεσης με AI', errorParse:'Αδυναμία ερμηνείας της απάντησης', calendar:'Ημερολόγιο', notesView:'Σημειώσεις', newNote:'Νέα σημείωση', noteTitlePH:'Τίτλος...', noteContentPH:'Περιεχόμενο σημείωσης...', noteTypeText:'Κείμενο', noteTypeCheck:'Λίστα', noteColor:'Χρώμα', noteLock:'Κλείδωμα με PIN', delete:'Διαγραφή', enterPin:'Εισαγωγή PIN', wrongPin:'Λάθος PIN', setPin:'Ορισμός PIN', changePin:'Αλλαγή PIN', locked:'Κλειδωμένο', dismiss:'Απόρριψη', alarmAction:'Ενέργεια υπενθύμισης', platformNone:'Κανένα', msgPH:'μήνυμα...', telegramBot:'Telegram Bot', send:'Αποστολή', installDone:'Η εφαρμογή εγκαταστάθηκε', promptTitle:'Γρήγορη αποστολή', gpContactPH:'αριθμός / email...', gpMsgPH:'μήνυμα...', gpEmptyMsg:'Πληκτρολογήστε ένα μήνυμα', gpSelectPlatform:'Επιλέξτε πλατφόρμα', gpEmptyContact:'Εισαγάγετε μια επαφή', gpSent:'στάλθηκε', systemPromptLabel:'System Prompt (προσαρμογή συμπεριφοράς AI)', systemPromptPH:'Αφήστε κενό για προεπιλεγμένο prompt...' },
+            ka: { flag:'🇬🇪', label:'ქართული', months:['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'], weekdays:['ორშ','სამშ','ოთხ','ხუთ','პარ','შაბ','კვი'], today:'დღეს', note:'შენიშვნა', alarm:'მაღვიძარა', notes:'შენიშვნები', notePH:'შეიყვანეთ შენიშვნა...', cancel:'გაუქმება', save:'შენახვა', savedNotes:'შენახული შენიშვნები', newAlarm:'ახალი მაღვიძარა / შეხსენება', alarmPH:'შეხსენება...', existingAlarms:'არსებული მაღვიძარები', noAlarmsDay:'მაღვიძარა ამ დღეს არ არის', reminders:'შეხსენებები', hide:'დამალვა', show:'ჩვენება', noActiveReminders:'აქტიური შეხსენებები არ არის', alarmTitle:'მაღვიძარა', updated:'განახლდა', newVersion:'აპლიკაციის ახალი ვერსია ხელმისაწვდომია.', themes:'თემები', aiChat:'AI ასისტენტი', chatEmpty:'მთხოვეთ შენიშვნის დამატება, შეხსენების დაყენება ან შეტყობინების გაგზავნა.<br>მაგალითი: "გაუგზავნე SMS დას: 10 წუთში მოვალ"', chatPH:'წამოწერეთ რამე...', aiSettings:'AI პარამეტრები', apiKeyLabel:'API გასაღები (ინახება ლოკალურად)', ollamaUrl:'Ollama URL', modelName:'მოდელი', saved:'შენახულია', actionNote:'შენიშვნა დაემატა', actionAlarm:'შეხსენება დაყენდა', actionSend:'შეტყობინება გაგზავნილია', actionList:'ნაპოვნია', thinking:'ვფიქრობ...', errorAPI:'შეცდომა AI-სთან დაკავშირებისას', errorParse:'პასუხის ინტერპრეტაცია ვერ მოხერხდა', calendar:'კალენდარი', notesView:'შენიშვნები', newNote:'ახალი შენიშვნა', noteTitlePH:'სათაური...', noteContentPH:'შენიშვნის შინაარსი...', noteTypeText:'ტექსტი', noteTypeCheck:'სია', noteColor:'ფერი', noteLock:'დაბლოკე PIN-ით', delete:'წაშლა', enterPin:'შეიყვანე PIN', wrongPin:'არასწორი PIN', setPin:'დააყენე PIN', changePin:'შეცვალე PIN', locked:'დაბლოკილი', dismiss:'უარყოფა', alarmAction:'შეხსენების მოქმედება', platformNone:'არცერთი', msgPH:'შეტყობინება...', telegramBot:'Telegram Bot', send:'გაგზავნა', installDone:'აპლიკაცია დაინსტალირებულია', promptTitle:'სწრაფი გაგზავნა', gpContactPH:'ნომერი / ელ...', gpMsgPH:'შეტყობინება...', gpEmptyMsg:'შეიყვანეთ შეტყობინება', gpSelectPlatform:'აირჩიეთ პლატფორმა', gpEmptyContact:'შეიყვანეთ კონტაქტი', gpSent:'გაგზავნილია', systemPromptLabel:'System Prompt (AI-ს ქცევის მორგება)', systemPromptPH:'დატოვეთ ცარიელი ნაგულისხმევი პრომპტისთვის...' },
+            zh: { flag:'🇨🇳', label:'中文', months:['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'], weekdays:['周一','周二','周三','周四','周五','周六','周日'], today:'今天', note:'备注', alarm:'闹钟', notes:'备注', notePH:'输入备注...', cancel:'取消', save:'保存', savedNotes:'已保存备注', newAlarm:'新闹钟 / 提醒', alarmPH:'提醒...', existingAlarms:'现有闹钟', noAlarmsDay:'今天没有闹钟', reminders:'提醒', hide:'隐藏', show:'显示', noActiveReminders:'没有活跃提醒', alarmTitle:'闹钟', updated:'已更新', newVersion:'新版本应用可用。', themes:'主题', aiChat:'AI 助手', chatEmpty:'让我添加备注、设置提醒或发送消息。<br>例如："给姐姐发短信：10分钟后到"', chatPH:'输入内容...', aiSettings:'AI 设置', apiKeyLabel:'API 密钥（本地存储）', ollamaUrl:'Ollama URL', modelName:'模型', saved:'已保存', actionNote:'备注已添加', actionAlarm:'提醒已设置', actionSend:'消息已发送', actionList:'已找到', thinking:'思考中...', errorAPI:'连接AI时出错', errorParse:'无法解析回复', calendar:'日历', notesView:'笔记', newNote:'新建笔记', noteTitlePH:'标题...', noteContentPH:'笔记内容...', noteTypeText:'文本', noteTypeCheck:'清单', noteColor:'颜色', noteLock:'PIN锁定', delete:'删除', enterPin:'输入PIN', wrongPin:'PIN错误', setPin:'设置PIN', changePin:'修改PIN', locked:'已锁定', dismiss:'关闭', alarmAction:'提醒操作', platformNone:'无', msgPH:'消息...', telegramBot:'Telegram Bot', send:'发送', installDone:'应用已安装', promptTitle:'快速发送', gpContactPH:'号码 / 邮箱...', gpMsgPH:'消息...', gpEmptyMsg:'输入消息', gpSelectPlatform:'选择平台', gpEmptyContact:'输入联系人', gpSent:'已发送', systemPromptLabel:'System Prompt（自定义AI行为）', systemPromptPH:'留空使用默认提示词...' },
+            ru: { flag:'🇷🇺', label:'Русский', months:['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'], weekdays:['Пн','Вт','Ср','Чт','Пт','Сб','Вс'], today:'Сегодня', note:'Заметка', alarm:'Будильник', notes:'Заметки', notePH:'Введите заметку...', cancel:'Отмена', save:'Сохранить', savedNotes:'Сохранённые заметки', newAlarm:'Новый будильник / напоминание', alarmPH:'Напоминание...', existingAlarms:'Существующие будильники', noAlarmsDay:'Нет будильников на этот день', reminders:'Напоминания', hide:'Скрыть', show:'Показать', noActiveReminders:'Нет активных напоминаний', alarmTitle:'Будильник', updated:'Обновлено', newVersion:'Доступна новая версия приложения.', themes:'Темы', aiChat:'AI ассистент', chatEmpty:'Попросите меня добавить заметку, установить напоминание или отправить сообщение.<br>Пример: "Отправь SMS сестре: Приеду через 10 минут"', chatPH:'Напишите что-нибудь...', aiSettings:'Настройки AI', apiKeyLabel:'API ключ (хранится локально)', ollamaUrl:'URL Ollama', modelName:'Модель', saved:'Сохранено', actionNote:'Заметка добавлена', actionAlarm:'Напоминание установлено', actionSend:'Сообщение отправлено', actionList:'Найдено', thinking:'Думаю...', errorAPI:'Ошибка подключения к AI', errorParse:'Не удалось интерпретировать ответ', calendar:'Календарь', notesView:'Заметки', newNote:'Новая заметка', noteTitlePH:'Заголовок...', noteContentPH:'Содержание заметки...', noteTypeText:'Текст', noteTypeCheck:'Список', noteColor:'Цвет', noteLock:'Заблокировать PIN-ом', delete:'Удалить', enterPin:'Введите PIN', wrongPin:'Неверный PIN', setPin:'Установить PIN', changePin:'Изменить PIN', locked:'Заблокировано', dismiss:'Закрыть', alarmAction:'Действие напоминания', platformNone:'Нет', msgPH:'сообщение...', telegramBot:'Telegram Bot', send:'Отправить', installDone:'Приложение установлено', promptTitle:'Быстрая отправка', gpContactPH:'номер / email...', gpMsgPH:'сообщение...', gpEmptyMsg:'Введите сообщение', gpSelectPlatform:'Выберите платформу', gpEmptyContact:'Введите контакт', gpSent:'отправлено', systemPromptLabel:'System Prompt (настроить поведение AI)', systemPromptPH:'Оставьте пустым для стандартного промпта...' },
+            ar: { flag:'🇸🇦', label:'العربية', months:['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'], weekdays:['اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت','أحد'], today:'اليوم', note:'ملاحظة', alarm:'منبه', notes:'ملاحظات', notePH:'أدخل ملاحظة...', cancel:'إلغاء', save:'حفظ', savedNotes:'ملاحظات محفوظة', newAlarm:'منبه جديد / تذكير', alarmPH:'تذكير...', existingAlarms:'منبهات موجودة', noAlarmsDay:'لا منبهات في هذا اليوم', reminders:'تذكيرات', hide:'إخفاء', show:'إظهار', noActiveReminders:'لا تذكيرات نشطة', alarmTitle:'منبه', updated:'تم التحديث', newVersion:'إصدار جديد من التطبيق متاح.', themes:'السمات', aiChat:'مساعد الذكاء الاصطناعي', chatEmpty:'اطلب مني إضافة ملاحظة أو تعيين تذكير أو إرسال رسالة.<br>مثال: "أرسل رسالة نصية لأخي: سأصل خلال 10 دقائق"', chatPH:'اكتب شيئاً...', aiSettings:'إعدادات الذكاء الاصطناعي', apiKeyLabel:'مفتاح API (يُخزّن محلياً)', ollamaUrl:'رابط Ollama', modelName:'النموذج', saved:'تم الحفظ', actionNote:'تمت إضافة الملاحظة', actionAlarm:'تم تعيين التذكير', actionSend:'تم إرسال الرسالة', actionList:'وجدت', thinking:'أفكر...', errorAPI:'خطأ في الاتصال بالذكاء الاصطناعي', errorParse:'تعذر تفسير الاستجابة', calendar:'التقويم', notesView:'الملاحظات', newNote:'ملاحظة جديدة', noteTitlePH:'العنوان...', noteContentPH:'محتوى الملاحظة...', noteTypeText:'نص', noteTypeCheck:'قائمة', noteColor:'اللون', noteLock:'قفل برمز PIN', delete:'حذف', enterPin:'أدخل PIN', wrongPin:'PIN خاطئ', setPin:'تعيين PIN', changePin:'تغيير PIN', locked:'مقفل', dismiss:'إغلاق', alarmAction:'إجراء التذكير', platformNone:'بدون', msgPH:'رسالة...', telegramBot:'بوت تيليجرام', send:'إرسال', installDone:'تم تثبيت التطبيق', systemPromptLabel:'System Prompt (تخصيص سلوك الذكاء الاصطناعي)', systemPromptPH:'اتركه فارغاً للإrompt الافتراضي...' }
+        };
+
+        let currentLang = 'sr';
+        let currentDate = new Date(), selectedDate = null, modalDateKey = null, panelVisible = true, firedAlarms = new Set();
+        const EVENTS_KEY = 'calendarEvents', ALARMS_KEY = 'calendarAlarms', THEME_KEY = 'calendarTheme';
+
+        function t(key) { return langDefs[currentLang][key] || langDefs['sr'][key] || key; }
+        function getMonthNames() { return t('months'); }
+        function getWeekdays() { return t('weekdays'); }
+
+        const themes = [
+            { id:'blue', name:'Plava', grad:'linear-gradient(135deg,#0f0c29,#302b63)', swatch:'#302b63' },
+            { id:'pink', name:'Roza', grad:'linear-gradient(135deg,#2d1b36,#f093fb)', swatch:'#f093fb' },
+            { id:'purple', name:'Ljubičasta', grad:'linear-gradient(135deg,#1a0a2e,#a855f7)', swatch:'#a855f7' },
+            { id:'gray', name:'Siva', grad:'linear-gradient(135deg,#111,#6b7280)', swatch:'#6b7280' },
+            { id:'yellow', name:'Žuta', grad:'linear-gradient(135deg,#1a1500,#f59e0b)', swatch:'#f59e0b' },
+            { id:'green', name:'Zelena', grad:'linear-gradient(135deg,#051a0a,#22c55e)', swatch:'#22c55e' },
+            { id:'red', name:'Crvena', grad:'linear-gradient(135deg,#1a0505,#ef4444)', swatch:'#ef4444' },
+            { id:'orange', name:'Narandžasta', grad:'linear-gradient(135deg,#1a0f05,#f97316)', swatch:'#f97316' },
+            { id:'white', name:'Bela', grad:'linear-gradient(135deg,#c8c8d4,#e8e8f0)', swatch:'#e8e8f0' },
+            { id:'black', name:'Crna (OLED)', grad:'linear-gradient(135deg,#000,#000)', swatch:'#111' }
+        ];
+
+        let currentTheme = 'blue';
+
+        function loadEvents() { try { return JSON.parse(localStorage.getItem(EVENTS_KEY)) || {}; } catch { return {}; } }
+        function saveEvents(e) { localStorage.setItem(EVENTS_KEY, JSON.stringify(e)); }
+        function loadAlarms() { try { return JSON.parse(localStorage.getItem(ALARMS_KEY)) || {}; } catch { return {}; } }
+        function saveAlarms(a) { localStorage.setItem(ALARMS_KEY, JSON.stringify(a)); }
+        function dateToKey(y,m,d) { return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+        function getEventsForDate(k) { return loadEvents()[k] || []; }
+        function hasEvents(k) { return getEventsForDate(k).length > 0; }
+        function addEvent(k,txt) { const e=loadEvents(); if(!e[k])e[k]=[]; e[k].push(txt.trim()); saveEvents(e); }
+        function deleteEvent(k,i) { const e=loadEvents(); if(e[k]){e[k].splice(i,1); if(!e[k].length)delete e[k]; saveEvents(e);} }
+        function getAlarmsForDate(k) { return loadAlarms()[k] || []; }
+        function hasAlarms(k) { return getAlarmsForDate(k).length > 0; }
+        function addAlarm(k,time,text,action) { const a=loadAlarms(); if(!a[k])a[k]=[]; const alarm={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),time,text:text.trim()||t('alarmPH').replace('...','')}; if(action)alarm.action=action; a[k].push(alarm); a[k].sort((x,y)=>x.time.localeCompare(y.time)); saveAlarms(a); }
+        function deleteAlarm(k,id) { const a=loadAlarms(); if(a[k]){a[k]=a[k].filter(x=>x.id!==id); if(!a[k].length)delete a[k]; saveAlarms(a);} }
+        function getAllFutureAlarms() { const a=loadAlarms(),now=new Date(),tk=dateToKey(now.getFullYear(),now.getMonth(),now.getDate()),nt=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,r=[]; for(const[d,l]of Object.entries(a))for(const al of l){r.push({dateKey:d,...al,isPast:d<tk||(d===tk&&al.time<nt)});} r.sort((a,b)=>{if(a.dateKey!==b.dateKey)return a.dateKey.localeCompare(b.dateKey);return a.time.localeCompare(b.time);}); return r; }
+        function formatDate(k) { const[y,m,d]=k.split('-'); return `${parseInt(d)}. ${getMonthNames()[parseInt(m)-1]} ${y}.`; }
+        function formatDateShort(k) { const[y,m,d]=k.split('-'); return `${parseInt(d)}.${m}.${y}`; }
+        function escapeHtml(t) { const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+
+        function applyTheme(id) {
+            document.documentElement.className = '';
+            if (id !== 'blue') document.documentElement.classList.add('theme-' + id);
+            currentTheme = id;
+            localStorage.setItem(THEME_KEY, id);
+            const meta = document.querySelector('meta[name="theme-color"]');
+            const th = themes.find(x=>x.id===id);
+            if (meta && th) meta.content = th.swatch;
+            document.querySelectorAll('.theme-option').forEach(o => {
+                o.classList.toggle('active', o.dataset.theme === id);
+            });
+        }
+
+        function buildThemeDropdown() {
+            const dd = document.getElementById('themeDropdown');
+            let html = `<div class="theme-dropdown-title">${t('themes')}</div>`;
+            themes.forEach(th => {
+                html += `<button class="theme-option${th.id===currentTheme?' active':''}" data-theme="${th.id}">
+                    <div class="theme-swatch" style="background:${th.swatch}"></div>
+                    ${th.name}
+                    <span class="check-icon">&#10003;</span>
+                </button>`;
+            });
+            dd.innerHTML = html;
+            dd.querySelectorAll('.theme-option').forEach(btn => {
+                btn.addEventListener('click', () => { applyTheme(btn.dataset.theme); buildThemeDropdown(); });
+            });
+        }
+
+        function applyLang(lang) {
+            currentLang = lang;
+            localStorage.setItem(LANG_KEY, lang);
+            document.getElementById('langBtn').textContent = lang.toUpperCase();
+            document.querySelectorAll('.lang-option').forEach(o => {
+                o.classList.toggle('active', o.dataset.lang === lang);
+            });
+            applyUIStrings();
+            renderCalendar();
+            renderPanel();
+            if (modalDateKey) {
+                document.getElementById('modalTitle').textContent = formatDate(modalDateKey);
+                renderNotesList();
+                renderAlarmsList();
+            }
+            buildThemeDropdown();
+        }
+
+        function applyUIStrings() {
+            const els = document.querySelectorAll('[data-i18n]');
+            els.forEach(el => { const key = el.dataset.i18n; if (t(key) !== key) el.textContent = t(key); });
+            const phs = document.querySelectorAll('[data-i18n-ph]');
+            phs.forEach(el => { const key = el.dataset.i18nPh; el.placeholder = t(key); });
+        }
+
+        function buildLangDropdown() {
+            const dd = document.getElementById('langDropdown');
+            let html = '';
+            for (const [code, def] of Object.entries(langDefs)) {
+                html += `<button class="lang-option${code===currentLang?' active':''}" data-lang="${code}">
+                    <span class="lang-flag">${def.flag}</span> ${def.label}
+                    <span class="lang-check">&#10003;</span>
+                </button>`;
+            }
+            dd.innerHTML = html;
+            dd.querySelectorAll('.lang-option').forEach(btn => {
+                btn.addEventListener('click', () => { applyLang(btn.dataset.lang); buildLangDropdown(); });
+            });
+        }
+
+        function openModal(dk) {
+            modalDateKey=dk; document.getElementById('modalTitle').textContent=formatDate(dk);
+            document.getElementById('noteInput').value='';
+            const now=new Date(),ct=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            document.getElementById('alarmTime').value=ct; document.getElementById('alarmText').value='';
+            renderNotesList(); renderAlarmsList();
+            document.getElementById('modalOverlay').classList.add('active');
+            document.getElementById('noteInput').focus();
+        }
+        function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); modalDateKey=null; }
+
+        function renderNotesList() {
+            const s=document.getElementById('notesSection'),n=getEventsForDate(modalDateKey);
+            if(!n.length){s.innerHTML='';return;}
+            let h=`<div class="section-label" style="margin-top:14px">${t('savedNotes')}</div><div style="max-height:140px;overflow-y:auto">`;
+            n.forEach((note,i)=>{h+=`<div class="note-item"><span>${escapeHtml(note)}</span><button class="delete-btn" data-type="note" data-index="${i}">&#10005;</button></div>`;});
+            h+='</div>'; s.innerHTML=h;
+            s.querySelectorAll('.delete-btn').forEach(b=>{b.addEventListener('click',()=>{deleteEvent(modalDateKey,parseInt(b.dataset.index));renderNotesList();renderCalendar();renderPanel();});});
+        }
+
+        function renderAlarmsList() {
+            const s=document.getElementById('alarmsSection'),a=getAlarmsForDate(modalDateKey);
+            if(!a.length){s.innerHTML=`<p class="no-items">${t('noAlarmsDay')}</p>`;return;}
+            const now=new Date(),tk=dateToKey(now.getFullYear(),now.getMonth(),now.getDate()),nt=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            let h=`<div class="section-label" style="margin-top:10px">${t('existingAlarms')}</div><div style="max-height:140px;overflow-y:auto">`;
+            a.forEach(al=>{const p=modalDateKey<tk||(modalDateKey===tk&&al.time<nt);const pi=al.action&&al.action.type&&al.action.type!=='none'?platformIcon[al.action.type]||'':'';h+=`<div class="alarm-item${p?' past':''}"><div class="alarm-time-badge">${al.time}</div><span>${escapeHtml(al.text)}</span>${pi?'<span class="alarm-platform-icon">'+pi+'</span>':''}<button class="delete-btn" data-alarm-id="${al.id}">&#10005;</button></div>`;});
+            h+='</div>'; s.innerHTML=h;
+            s.querySelectorAll('.delete-btn').forEach(b=>{b.addEventListener('click',()=>{deleteAlarm(modalDateKey,b.dataset.alarmId);renderAlarmsList();renderCalendar();renderPanel();});});
+        }
+
+        function renderPanel() {
+            const all=getAllFutureAlarms(),active=all.filter(a=>!a.isPast);
+            document.getElementById('alarmCount').textContent=active.length;
+            document.getElementById('panelToggle').textContent = panelVisible ? t('hide') : t('show');
+            document.querySelector('#alarmsPanel .panel-header h3').childNodes[0].textContent = t('reminders') + ' ';
+            const l=document.getElementById('alarmsList');
+            if(!active.length){l.innerHTML=`<p class="no-alarms">${t('noActiveReminders')}</p>`;return;}
+            let h='';
+            active.forEach(a=>{const pi=a.action&&a.action.type&&a.action.type!=='none'?platformNames[a.action.type]:'';h+=`<div class="panel-alarm-item"><div class="panel-alarm-date">${formatDateShort(a.dateKey)}</div><div class="panel-alarm-time">${a.time}</div><div class="panel-alarm-text">${escapeHtml(a.text)}</div>${pi?'<span class="panel-alarm-platform">'+pi+'</span>':''}<button class="delete-btn" data-date="${a.dateKey}" data-alarm-id="${a.id}">&#10005;</button></div>`;});
+            l.innerHTML=h;
+            l.querySelectorAll('.delete-btn').forEach(b=>{b.addEventListener('click',()=>{deleteAlarm(b.dataset.date,b.dataset.alarmId);renderPanel();renderCalendar();if(modalDateKey===b.dataset.date)renderAlarmsList();});});
+        }
+
+        function requestNotificationPermission() { if('Notification'in window&&Notification.permission==='default')Notification.requestPermission(); }
+        function playAlarmSound() { try{const c=new(window.AudioContext||window.webkitAudioContext)();function b(s,f,d){const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;o.type='sine';g.gain.setValueAtTime(0.3,s);g.gain.exponentialRampToValueAtTime(0.01,s+d);o.start(s);o.stop(s+d);}const t=c.currentTime;b(t,880,0.15);b(t+0.18,880,0.15);b(t+0.4,1100,0.3);}catch(e){} }
+        function showToast(title,msg) { document.getElementById('toastTitle').textContent=title;document.getElementById('toastMessage').textContent=msg;const el=document.getElementById('toast');el.classList.add('show');clearTimeout(showToast._timer);showToast._timer=setTimeout(()=>el.classList.remove('show'),6000); }
+        function sendNotification(title,body) { playAlarmSound();showToast(title,body);if('Notification'in window&&Notification.permission==='granted')new Notification(title,{body:body}); }
+
+        function checkAlarms() {
+            const now=new Date(),tk=dateToKey(now.getFullYear(),now.getMonth(),now.getDate()),ct=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            (loadAlarms()[tk]||[]).forEach(al=>{
+                const fk=`${tk}_${al.time}`;
+                if(al.time===ct&&!firedAlarms.has(fk)){
+                    firedAlarms.add(fk);
+                    sendNotification(t('alarmTitle'),al.text);
+                    if(al.action&&al.action.type==='telegram'){
+                        const s=loadAISettings();
+                        if(s.telegramToken&&s.telegramChatId){
+                            fetch('https://api.telegram.org/bot'+s.telegramToken+'/sendMessage',{
+                                method:'POST',headers:{'Content-Type':'application/json'},
+                                body:JSON.stringify({chat_id:s.telegramChatId,text:al.action.message||al.text})
+                            }).catch(()=>{});
+                            showToast('Telegram',t('saved'));
+                        }else{
+                            showReminderPopup(al);
+                        }
+                    }else{
+                        showReminderPopup(al);
+                    }
+                    const d=document.querySelector(`.day[data-key="${tk}"]`);
+                    if(d){d.classList.add('alarm-firing');setTimeout(()=>d.classList.remove('alarm-firing'),3500);}
+                }
+            });
+            renderPanel();
+        }
+
+        let activeReminder=null;
+        function showReminderPopup(alarm){
+            activeReminder=alarm;
+            const icon=alarm.action&&alarm.action.type?platformIcon[alarm.action.type]:'&#9200;';
+            document.getElementById('reminderIcon').innerHTML=icon;
+            document.getElementById('reminderTime').textContent=alarm.time;
+            document.getElementById('reminderText').textContent=alarm.text;
+            const actions=document.getElementById('reminderActions');
+            let ah='';
+            if(alarm.action&&alarm.action.type&&alarm.action.type!=='none'){
+                const plat=alarm.action.type,n=alarm.action.number,m=alarm.action.message||alarm.text;
+                if(plat==='telegram'){
+                    const s=loadAISettings();
+                    if(s.telegramToken&&s.telegramChatId){
+                        ah+='<button class="share-btn telegram-btn-s share-btn-single" id="telegramAutoBtn">✈️ '+t('send')+' Telegram</button>';
+                    }else{
+                        ah+=buildShareButton(plat,n,m,'✈️ Telegram');
+                    }
+                }else{
+                    const labels={viber:'💬 Viber',whatsapp:'💬 WhatsApp',signal:'🔒 Signal',messenger:'💬 Messenger',sms:'📱 SMS',email:'📧 Email'};
+                    ah+=buildShareButton(plat,n,m,labels[plat]||plat);
+                }
+            }
+            ah+='<button class="reminder-dismiss" id="reminderDismissBtn">'+t('dismiss')+'</button>';
+            actions.innerHTML=ah;
+            document.getElementById('reminderPopup').classList.add('active');
+            document.getElementById('reminderDismissBtn').addEventListener('click',closeReminderPopup);
+            const tgBtn=document.getElementById('telegramAutoBtn');
+            if(tgBtn){
+                tgBtn.addEventListener('click',async()=>{
+                    const s=loadAISettings();
+                    try{
+                        const r=await fetch('https://api.telegram.org/bot'+s.telegramToken+'/sendMessage',{
+                            method:'POST',headers:{'Content-Type':'application/json'},
+                            body:JSON.stringify({chat_id:s.telegramChatId,text:alarm.text})
+                        });
+                        if(r.ok){showToast('Telegram',t('saved'));tgBtn.textContent='✅ '+t('saved');tgBtn.disabled=true;}
+                        else{showToast('Telegram','Error');}
+                    }catch(e){showToast('Telegram','Error');}
+                });
+            }
+        }
+        function closeReminderPopup(){document.getElementById('reminderPopup').classList.remove('active');activeReminder=null;}
+        document.getElementById('reminderPopup').addEventListener('click',e=>{if(e.target===e.currentTarget)closeReminderPopup();});
+
+        function renderCalendar() {
+            const y=currentDate.getFullYear(),m=currentDate.getMonth();
+            const mn = getMonthNames();
+            document.getElementById('monthYear').textContent=`${mn[m]} ${y}`;
+            const wd = getWeekdays();
+            document.querySelectorAll('.weekday').forEach((el,i)=>{if(wd[i])el.textContent=wd[i];});
+            const fd=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),dp=new Date(y,m,0).getDate(),sd=fd===0?6:fd-1;
+            const c=document.getElementById('daysContainer'); c.innerHTML='';
+            const today=new Date();
+            for(let i=sd-1;i>=0;i--){const d=document.createElement('div');d.className='day other-month';d.textContent=dp-i;c.appendChild(d);}
+            for(let d=1;d<=dim;d++){
+                const el=document.createElement('div');el.className='day';
+                if(d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear())el.classList.add('today');
+                if(selectedDate&&d===selectedDate.getDate()&&m===selectedDate.getMonth()&&y===selectedDate.getFullYear())el.classList.add('selected');
+                const k=dateToKey(y,m,d); el.dataset.key=k;
+                const ev=hasEvents(k),al=hasAlarms(k);
+                if(ev&&al)el.classList.add('has-event','has-alarm','has-both');
+                else{if(ev)el.classList.add('has-event');if(al)el.classList.add('has-alarm');}
+                el.textContent=d; el.addEventListener('click',()=>openModal(k)); c.appendChild(el);
+            }
+            const rem=42-c.children.length;
+            for(let i=1;i<=rem;i++){const d=document.createElement('div');d.className='day other-month';d.textContent=i;c.appendChild(d);}
+        }
+
+        document.getElementById('modalSave').addEventListener('click',()=>{const txt=document.getElementById('noteInput').value.trim();if(txt&&modalDateKey){addEvent(modalDateKey,txt);document.getElementById('noteInput').value='';renderNotesList();renderCalendar();}});
+        // ===== PLATFORM SELECTOR =====
+        let selectedPlatform='none';
+        const platformIcon={viber:'💬',whatsapp:'💬',telegram:'✈️',signal:'🔒',messenger:'💬',sms:'📱',email:'📧'};
+        const platformNames={viber:'Viber',whatsapp:'WhatsApp',telegram:'Telegram',signal:'Signal',messenger:'Messenger',sms:'SMS',email:'Email'};
+
+        document.querySelectorAll('#platformSelector .platform-btn').forEach(btn=>{
+            btn.addEventListener('click',()=>{
+                selectedPlatform=btn.dataset.platform;
+                document.querySelectorAll('#platformSelector .platform-btn').forEach(b=>b.classList.remove('active'));
+                btn.classList.add('active');
+                const fields=document.getElementById('platformFields');
+                if(selectedPlatform==='none'){fields.style.display='none';}
+                else{fields.style.display='flex';
+                    const numInput=document.getElementById('platformNumber');
+                    const msgInput=document.getElementById('platformMsg');
+                    if(selectedPlatform==='email'){numInput.type='email';numInput.placeholder='email...';}
+                    else{numInput.type='tel';numInput.placeholder='broj...';}
+                    msgInput.placeholder=t('msgPH');
+                }
+            });
+        });
+
+        function buildShareLink(type,number,message){
+            const num=number.replace(/[^0-9+]/g,'');
+            const msg=encodeURIComponent(message);
+            switch(type){
+                case 'viber':return 'viber://chat?number='+num+'&text='+msg;
+                case 'whatsapp':return 'https://wa.me/'+num.replace(/[^0-9]/g,'')+'?text='+msg;
+                case 'telegram':return 'https://t.me/'+num.replace(/[^0-9a-zA-Z_]/g,'')+'?text='+msg;
+                case 'signal':return 'https://signal.me/#p/'+num.replace(/[^0-9+]/g,'');
+                case 'messenger':return 'https://fb-messenger.com/share?link='+encodeURIComponent('https://m.me/'+num.replace(/[^0-9]/g,''));
+                case 'sms':return 'sms:'+num+'?body='+msg;
+                case 'email':return 'mailto:'+number+'?subject='+encodeURIComponent(message.split('\n')[0]||message)+'&body='+msg;
+                default:return null;
+            }
+        }
+
+        function buildShareButton(type,number,message,label){
+            const link=buildShareLink(type,number,message);
+            if(!link)return'';
+            return '<a class="share-btn '+type+'-btn-s" href="'+link+'" target="_blank" rel="noopener">'+platformIcon[type]+' '+label+'</a>';
+        }
+
+        document.getElementById('alarmAddBtn').addEventListener('click',()=>{
+            const time=document.getElementById('alarmTime').value,text=document.getElementById('alarmText').value.trim();
+            if(!time||!modalDateKey)return;
+            let action=null;
+            if(selectedPlatform!=='none'){
+                const num=document.getElementById('platformNumber').value.trim();
+                const msg=document.getElementById('platformMsg').value.trim();
+                if(num){action={type:selectedPlatform,number:num,message:msg||text};}
+            }
+            addAlarm(modalDateKey,time,text,action);
+            document.getElementById('alarmText').value='';
+            document.getElementById('platformNumber').value='';
+            document.getElementById('platformMsg').value='';
+            renderAlarmsList();renderCalendar();renderPanel();
+        });
+        document.getElementById('alarmText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('alarmAddBtn').click();}});
+
+        document.getElementById('modalCancel').addEventListener('click',closeModal);
+        document.getElementById('modalClose').addEventListener('click',closeModal);
+        document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+        document.getElementById('noteInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();document.getElementById('modalSave').click();}});
+        document.getElementById('prevMonth').addEventListener('click',()=>{currentDate.setMonth(currentDate.getMonth()-1);renderCalendar();});
+        document.getElementById('nextMonth').addEventListener('click',()=>{currentDate.setMonth(currentDate.getMonth()+1);renderCalendar();});
+        document.getElementById('panelToggle').addEventListener('click',()=>{panelVisible=!panelVisible;document.getElementById('alarmsList').style.display=panelVisible?'block':'none';document.getElementById('panelToggle').textContent=panelVisible?t('hide'):t('show');});
+        document.getElementById('toastClose').addEventListener('click',()=>{document.getElementById('toast').classList.remove('show');});
+
+        document.getElementById('themeBtn').addEventListener('click',e=>{e.stopPropagation();document.getElementById('langDropdown').classList.remove('open');document.getElementById('themeDropdown').classList.toggle('open');});
+        document.getElementById('langBtn').addEventListener('click',e=>{e.stopPropagation();document.getElementById('themeDropdown').classList.remove('open');document.getElementById('langDropdown').classList.toggle('open');});
+        document.addEventListener('click',e=>{if(!e.target.closest('.theme-toggle'))document.getElementById('themeDropdown').classList.remove('open');if(!e.target.closest('.lang-toggle'))document.getElementById('langDropdown').classList.remove('open');});
+
+        requestNotificationPermission();
+        currentTheme = localStorage.getItem(THEME_KEY) || 'blue';
+        currentLang = localStorage.getItem(LANG_KEY) || 'sr';
+        applyTheme(currentTheme);
+        applyLang(currentLang);
+        buildLangDropdown();
+        renderCalendar();
+        renderPanel();
+        checkAlarms();
+        setInterval(checkAlarms, 60000);
+
+        if('serviceWorker'in navigator){navigator.serviceWorker.register('./sw.js').then(r=>{r.addEventListener('updatefound',()=>{const w=r.installing;w.addEventListener('statechange',()=>{if(w.state==='activated')showToast(t('updated'),t('newVersion'));});});}).catch(()=>{});}
+
+        // ===== AI CHAT =====
+        const AI_KEY='aiSettings', chatHistory=[];
+        const SYSTEM_PROMPT=`You are a calendar and messaging assistant. You can add notes, set reminders/alarms, and send messages across platforms.
+
+When the user asks to add a note, set a reminder, or send a message, respond with JSON only (no other text):
+{"actions":[{"type":"note","text":"...","date":"YYYY-MM-DD"},{"type":"alarm","text":"...","date":"YYYY-MM-DD","time":"HH:MM","action":{"type":"PLATFORM","number":"CONTACT","message":"MSG"}},{"type":"send","platform":"PLATFORM","number":"CONTACT","message":"MSG"}]}
+
+ACTION TYPES:
+1. "note" - adds a calendar note (requires: text, date)
+2. "alarm" - sets a timed reminder (requires: text, date, time; optional: action with platform)
+3. "send" - sends a message immediately via a platform (requires: platform, number, message)
+
+SUPPORTED PLATFORMS: "viber", "whatsapp", "telegram", "signal", "messenger", "sms", "email"
+
+MESSAGING RULES:
+- When the user says "pošalji / send / šalji" with a platform name, use type "send".
+- If user says "sestri preko Telegrama" → platform: "telegram", number: "sestra" (or known contact), message: the text.
+- If user says "SMS-om na +381..." → platform: "sms", number: "+381...", message: the text.
+- If user says "Viber-om" → platform: "viber".
+- For Telegram Bot API auto-send: if botToken is configured, the system will send automatically. Otherwise it opens the app.
+- "number" can be a phone number, username, or email depending on platform.
+
+OTHER RULES:
+- "date" must be YYYY-MM-DD. Today is calculated from the user's device.
+- Multiple actions in one response are allowed.
+- For questions unrelated to calendar/messaging, respond: {"reply":"your answer here"}
+- If listing events, respond: {"reply":"..."} with the info from context.
+- ALWAYS respond in the same language the user writes in.
+- Keep note texts concise. For alarms, infer a reasonable time if not specified.`;
+
+        function loadAISettings(){try{return JSON.parse(localStorage.getItem(AI_KEY))||{};}catch{return{}};}
+        function saveAISettings(s){localStorage.setItem(AI_KEY,JSON.stringify(s));}
+
+        function getSystemPrompt(){
+            const s=loadAISettings();
+            const base=s.systemPrompt&&s.systemPrompt.trim()?s.systemPrompt.trim():SYSTEM_PROMPT;
+            const ev=loadEvents(),al=loadAlarms(),now=new Date();
+            let ctx='Current date: '+now.toISOString().slice(0,10)+'. Existing notes: ';
+            for(const[k,v]of Object.entries(ev))ctx+=k+': '+v.join('; ')+'. ';
+            ctx+=' Existing alarms: ';
+            for(const[k,l]of Object.entries(al))for(const a of l)ctx+=k+' '+a.time+' '+a.text+'. ';
+            return base+'\n'+ctx;
+        }
+
+        const aiProviders={
+            ollama:{name:'Ollama',url:s=>(s.ollamaUrl||'http://localhost:11434')+'/api/chat',headers:s=>({'Content-Type':'application/json'}),body:(s,msg)=>({model:s.model||'llama3',messages:[{role:'system',content:getSystemPrompt()},{role:'user',content:msg}],stream:false})},
+            openai:{name:'OpenAI',url:()=>'https://api.openai.com/v1/chat/completions',headers:s=>({'Content-Type':'application/json','Authorization':'Bearer '+s.apiKey}),body:(s,msg)=>({model:s.model||'gpt-4o-mini',messages:[{role:'system',content:getSystemPrompt()},{role:'user',content:msg}]})},
+            anthropic:{name:'Claude',url:()=>'https://api.anthropic.com/v1/messages',headers:s=>({'Content-Type':'application/json','x-api-key':s.apiKey,'anthropic-version':'2023-06-01'}),body:(s,msg)=>({model:s.model||'claude-sonnet-4-20250514',max_tokens:1024,system:getSystemPrompt(),messages:[{role:'user',content:msg}]})},
+            gemini:{name:'Gemini',url:s=>'https://generativelanguage.googleapis.com/v1beta/models/'+(s.model||'gemini-2.0-flash')+':generateContent?key='+s.apiKey,headers:s=>({'Content-Type':'application/json'}),body:(s,msg)=>({contents:[{parts:[{text:getSystemPrompt()+'\n\nUser: '+msg}]}]})},
+            openrouter:{name:'OpenRouter',url:()=>'https://openrouter.ai/api/v1/chat/completions',headers:s=>({'Content-Type':'application/json','Authorization':'Bearer '+s.apiKey}),body:(s,msg)=>({model:s.model||'openai/gpt-4o-mini',messages:[{role:'system',content:getSystemPrompt()},{role:'user',content:msg}]})},
+            kimi:{name:'Kimi',url:()=>'https://api.moonshot.cn/v1/chat/completions',headers:s=>({'Content-Type':'application/json','Authorization':'Bearer '+s.apiKey}),body:(s,msg)=>({model:s.model||'moonshot-v1-8k',messages:[{role:'system',content:getSystemPrompt()},{role:'user',content:msg}]})}
+        };
+
+        async function callAI(msg){
+            const s=loadAISettings(),p=document.getElementById('chatProvider').value,prov=aiProviders[p];
+            if(p!=='ollama'&&!s.apiKey)throw new Error('no-key');
+            const r=await fetch(prov.url(s),{method:'POST',headers:prov.headers(s),body:JSON.stringify(prov.body(s,msg))});
+            if(!r.ok)throw new Error('api');
+            const d=await r.json();
+            if(p==='anthropic')return d.content[0].text;
+            if(p==='gemini')return d.candidates[0].content.parts[0].text;
+            return d.choices[0].message.content;
+        }
+
+        function parseAIResponse(raw){
+            try{
+                const cleaned=raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+                const j=JSON.parse(cleaned);
+                if(j.actions)return{actions:j.actions};
+                if(j.reply)return{reply:j.reply};
+                return{reply:raw};
+            }catch{return{reply:raw};}
+        }
+
+        function executeActions(actions){
+            const results=[];
+            for(const a of actions){
+                if(a.type==='note'&&a.date&&a.text){
+                    addEvent(a.date,a.text);
+                    results.push({type:'note',date:a.date,text:a.text});
+                }else if(a.type==='alarm'&&a.date&&a.time&&a.text){
+                    const validPlatforms=['viber','whatsapp','telegram','signal','messenger','sms','email'];
+                    let action=null;
+                    if(a.action&&a.action.type&&validPlatforms.includes(a.action.type)){
+                        action={type:a.action.type,number:a.action.number,message:a.action.message||a.text};
+                    }
+                    addAlarm(a.date,a.time,a.text,action);
+                    results.push({type:'alarm',date:a.date,time:a.time,text:a.text,action:action});
+                }else if(a.type==='send'&&a.platform&&a.number&&a.message){
+                    const s=loadAISettings();
+                    if(a.platform==='telegram'&&s.botToken){
+                        fetch('https://api.telegram.org/bot'+s.botToken+'/sendMessage?chat_id='+encodeURIComponent(a.number)+'&text='+encodeURIComponent(a.message))
+                        .then(r=>{if(r.ok)showToast('Telegram','✅ '+t('gpSent'));else showToast('Telegram','Error');})
+                        .catch(()=>{const link=buildShareLink(a.platform,a.number,a.message);if(link)window.open(link,'_blank');});
+                    }else{
+                        const link=buildShareLink(a.platform,a.number,a.message);
+                        if(link)window.open(link,'_blank');
+                    }
+                    results.push({type:'send',platform:a.platform,number:a.number,message:a.message});
+                }
+            }
+            renderCalendar();renderPanel();
+            return results;
+        }
+
+        function chatTime(){return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+
+        function renderChatMsg(role,text,extra){
+            const el=document.createElement('div');
+            el.className='chat-msg '+role;
+            let html=escapeHtml(text);
+            if(extra){
+                for(const a of extra){
+                    let badge='';
+                    if(a.type==='note')badge='<span class="chat-action-badge note">'+t('actionNote')+': '+escapeHtml(a.text)+'</span>';
+                    else if(a.type==='alarm')badge='<span class="chat-action-badge alarm">'+t('actionAlarm')+': '+a.time+' - '+escapeHtml(a.text)+'</span>';
+                    else if(a.type==='send')badge='<span class="chat-action-badge send">'+t('actionSend')+': '+platformIcon[a.platform]+' '+escapeHtml(a.number)+' → '+escapeHtml(a.message)+'</span>';
+                    html+=badge;
+                }
+            }
+            html+='<div class="msg-time">'+chatTime()+'</div>';
+            el.innerHTML=html;
+            return el;
+        }
+
+        function showTyping(){
+            const el=document.createElement('div');
+            el.className='chat-typing';el.id='chatTyping';
+            el.innerHTML='<span></span><span></span><span></span>';
+            document.getElementById('chatMessages').appendChild(el);
+            scrollChat();
+        }
+        function hideTyping(){const el=document.getElementById('chatTyping');if(el)el.remove();}
+
+        function scrollChat(){const c=document.getElementById('chatMessages');c.scrollTop=c.scrollHeight;}
+
+        function addChat(role,text,actions){
+            const c=document.getElementById('chatMessages');
+            const empty=document.getElementById('chatEmpty');
+            if(empty)empty.remove();
+            c.appendChild(renderChatMsg(role,text,actions));
+            scrollChat();
+        }
+
+        async function sendChatMsg(){
+            const input=document.getElementById('chatInput');
+            const msg=input.value.trim();
+            if(!msg)return;
+            input.value='';input.style.height='auto';
+            addChat('user',msg);
+            chatHistory.push({role:'user',content:msg});
+            showTyping();
+            document.getElementById('chatSendBtn').disabled=true;
+            try{
+                const raw=await callAI(msg);
+                hideTyping();
+                const parsed=parseAIResponse(raw);
+                if(parsed.actions&&parsed.actions.length){
+                    const results=executeActions(parsed.actions);
+                    addChat('ai',t('saved'),results);
+                }else{
+                    addChat('ai',parsed.reply||raw);
+                }
+            }catch(e){
+                hideTyping();
+                const err=e.message==='no-key'?t('apiKeyLabel')+': '+t('aiSettings'):t('errorAPI');
+                addChat('error',err);
+            }
+            document.getElementById('chatSendBtn').disabled=false;
+            document.getElementById('chatInput').focus();
+        }
+
+        document.getElementById('chatSendBtn').addEventListener('click',sendChatMsg);
+        document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMsg();}});
+        document.getElementById('chatInput').addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px';});
+
+        // Voice input
+        let recognition=null;
+        document.getElementById('chatMicBtn').addEventListener('click',function(){
+            if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){showToast('','Speech not supported');return;}
+            if(recognition){recognition.stop();recognition=null;this.classList.remove('recording');return;}
+            const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+            recognition=new SR();
+            recognition.lang=currentLang==='sr'?'sr-Latn-RS':currentLang;
+            recognition.interimResults=false;
+            recognition.maxAlternatives=1;
+            const mic=this;
+            mic.classList.add('recording');
+            recognition.onresult=e=>{
+                const txt=e.results[0][0].transcript;
+                document.getElementById('chatInput').value=txt;
+                mic.classList.remove('recording');
+                recognition=null;
+            };
+            recognition.onerror=()=>{mic.classList.remove('recording');recognition=null;};
+            recognition.onend=()=>{mic.classList.remove('recording');recognition=null;};
+            recognition.start();
+        });
+
+        // Settings modal
+        document.getElementById('chatSettingsBtn').addEventListener('click',()=>{
+            const s=loadAISettings();
+            document.getElementById('apiKeyInput').value=s.apiKey||'';
+            document.getElementById('ollamaUrlInput').value=s.ollamaUrl||'http://localhost:11434';
+            document.getElementById('modelNameInput').value=s.model||'';
+            document.getElementById('telegramTokenInput').value=s.telegramToken||'';
+            document.getElementById('telegramChatIdInput').value=s.telegramChatId||'';
+            document.getElementById('systemPromptInput').value=s.systemPrompt||'';
+            document.getElementById('settingsOverlay').classList.add('active');
+        });
+        document.getElementById('settingsClose').addEventListener('click',()=>document.getElementById('settingsOverlay').classList.remove('active'));
+        document.getElementById('settingsCancelBtn').addEventListener('click',()=>document.getElementById('settingsOverlay').classList.remove('active'));
+        document.getElementById('settingsOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)e.target.classList.remove('active');});
+        document.getElementById('settingsSaveBtn').addEventListener('click',()=>{
+            saveAISettings({
+                apiKey:document.getElementById('apiKeyInput').value.trim(),
+                ollamaUrl:document.getElementById('ollamaUrlInput').value.trim(),
+                model:document.getElementById('modelNameInput').value.trim(),
+                telegramToken:document.getElementById('telegramTokenInput').value.trim(),
+                telegramChatId:document.getElementById('telegramChatIdInput').value.trim(),
+                systemPrompt:document.getElementById('systemPromptInput').value
+            });
+            document.getElementById('settingsOverlay').classList.remove('active');
+            showToast(t('saved'),t('aiSettings'));
+        });
+
+        // Restore provider
+        const savedProvider=localStorage.getItem('chatProvider');
+        if(savedProvider)document.getElementById('chatProvider').value=savedProvider;
+        document.getElementById('chatProvider').addEventListener('change',function(){localStorage.setItem('chatProvider',this.value);});
+
+        // ===== VIEW TOGGLE =====
+        let currentView='calendar';
+        document.getElementById('viewCalBtn').addEventListener('click',()=>switchView('calendar'));
+        document.getElementById('viewNotesBtn').addEventListener('click',()=>switchView('notes'));
+        function switchView(v){
+            currentView=v;
+            document.getElementById('calendarView').style.display=v==='calendar'?'block':'none';
+            document.getElementById('notesView').style.display=v==='notes'?'block':'none';
+            document.getElementById('notesFab').style.display=v==='notes'?'flex':'none';
+            document.getElementById('viewCalBtn').classList.toggle('active',v==='calendar');
+            document.getElementById('viewNotesBtn').classList.toggle('active',v==='notes');
+            if(v==='notes')renderNotesGrid();
+        }
+
+        // ===== NOTES SYSTEM =====
+        const NOTES_KEY='colorNotes', PIN_HASH_KEY='colorNotesPin';
+        const NOTE_COLORS=[
+            {id:'yellow',bg:'#FFF9C4',text:'#5D4037'},{id:'blue',bg:'#BBDEFB',text:'#1565C0'},
+            {id:'green',bg:'#C8E6C9',text:'#2E7D32'},{id:'pink',bg:'#F8BBD0',text:'#AD1457'},
+            {id:'purple',bg:'#D1C4E9',text:'#4527A0'},{id:'orange',bg:'#FFE0B2',text:'#E65100'},
+            {id:'red',bg:'#FFCDD2',text:'#C62828'},{id:'teal',bg:'#B2DFDB',text:'#00695C'},
+            {id:'gray',bg:'#E0E0E0',text:'#424242'},{id:'white',bg:'#FAFAFA',text:'#212121'},
+            {id:'mint',bg:'#E0F2F1',text:'#004D40'},{id:'peach',bg:'#FBE9E7',text:'#BF360C'}
+        ];
+
+        function loadNotes(){try{return JSON.parse(localStorage.getItem(NOTES_KEY))||[];}catch{return[];}}
+        function saveNotes(n){localStorage.setItem(NOTES_KEY,JSON.stringify(n));}
+        function hashPin(pin){let h=0;for(let i=0;i<pin.length;i++){h=((h<<5)-h)+pin.charCodeAt(i);h|=0;}return h.toString(36);}
+        function getGlobalPin(){try{return localStorage.getItem(PIN_HASH_KEY);}catch{return null;}}
+
+        let editingNoteId=null, currentNoteColor='yellow', currentNoteType='text', currentChecklist=[], pinBuffer='', pinMode='', pinCallback=null;
+
+        function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+        function renderNotesGrid(){
+            const notes=loadNotes(), grid=document.getElementById('notesGrid');
+            if(!notes.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px 0;color:var(--text-d)"><div style="font-size:32px;margin-bottom:8px">&#128221;</div><div data-i18n="newNote">Nova bele&#353;ka</div><div style="font-size:12px;margin-top:4px" data-i18n="chatEmpty">Dodaj prvu bele&#353;ku</div></div>';return;}
+            let h='';
+            notes.forEach(n=>{
+                const c=NOTE_COLORS.find(x=>x.id===n.color)||NOTE_COLORS[0];
+                const isLocked=n.locked;
+                h+='<div class="note-card'+(isLocked?' locked':'')+'" data-id="'+n.id+'" style="background:'+c.bg+';color:'+c.text+'">';
+                if(isLocked){
+                    h+='<div class="note-card-dots"></div>';
+                    h+='<div class="note-card-lock">&#128274;</div>';
+                    h+='<div class="note-card-lock-label">'+t('locked')+'</div>';
+                }else{
+                    if(n.title)h+='<div class="note-card-title">'+escapeHtml(n.title)+'</div>';
+                    if(n.type==='checklist'&&n.checklist){
+                        h+='<ul class="note-card-checklist">';
+                        n.checklist.slice(0,6).forEach(item=>{
+                            h+='<li class="'+(item.checked?'checked':'')+'">'+escapeHtml(item.text)+'</li>';
+                        });
+                        if(n.checklist.length>6)h+='<li style="opacity:0.5">+ '+(n.checklist.length-6)+'...</li>';
+                        h+='</ul>';
+                    }else if(n.content){
+                        h+='<div class="note-card-preview">'+escapeHtml(n.content)+'</div>';
+                    }
+                }
+                h+='</div>';
+            });
+            grid.innerHTML=h;
+            grid.querySelectorAll('.note-card').forEach(card=>{
+                card.addEventListener('click',()=>{const n=notes.find(x=>x.id===card.dataset.id);if(n){
+                    if(n.locked){
+                        pinMode='unlock';pinBuffer='';pinCallback=()=>openNoteEditor(n.id);
+                        document.getElementById('pinTitle').textContent=t('enterPin');
+                        showPinModal();
+                    }else openNoteEditor(n.id);
+                }});
+            });
+        }
+
+        function openNoteEditor(id){
+            const notes=loadNotes();let note=id?notes.find(x=>x.id===id):null;
+            editingNoteId=id||null;
+            if(note){
+                document.getElementById('noteEditorTitle').textContent=t('newNote');
+                document.getElementById('noteTitleInput').value=note.title||'';
+                currentNoteColor=note.color||'yellow';
+                currentNoteType=note.type||'text';
+                document.getElementById('noteContentInput').value=note.content||'';
+                currentChecklist=note.checklist?JSON.parse(JSON.stringify(note.checklist)):[{text:'',checked:false}];
+                document.getElementById('noteLockToggle').checked=!!note.locked;
+                document.getElementById('noteDeleteBtn').style.display='block';
+            }else{
+                document.getElementById('noteEditorTitle').textContent=t('newNote');
+                document.getElementById('noteTitleInput').value='';
+                currentNoteColor='yellow';
+                currentNoteType='text';
+                document.getElementById('noteContentInput').value='';
+                currentChecklist=[{text:'',checked:false}];
+                document.getElementById('noteLockToggle').checked=false;
+                document.getElementById('noteDeleteBtn').style.display='none';
+            }
+            document.getElementById('noteTypeText').classList.toggle('active',currentNoteType==='text');
+            document.getElementById('noteTypeCheck').classList.toggle('active',currentNoteType==='checklist');
+            document.getElementById('noteTextSection').style.display=currentNoteType==='text'?'block':'none';
+            document.getElementById('noteCheckSection').style.display=currentNoteType==='checklist'?'block':'none';
+            renderColorPicker();renderChecklistEditor();
+            document.getElementById('noteEditorOverlay').classList.add('active');
+        }
+
+        function renderColorPicker(){
+            const picker=document.getElementById('noteColorPicker');
+            let h='';
+            NOTE_COLORS.forEach(c=>{
+                h+='<div class="color-dot'+(c.id===currentNoteColor?' active':'')+'" data-color="'+c.id+'" style="background:'+c.bg+';border-color:'+(c.id===currentNoteColor?c.text:'transparent')+'"></div>';
+            });
+            picker.innerHTML=h;
+            picker.querySelectorAll('.color-dot').forEach(dot=>{
+                dot.addEventListener('click',()=>{currentNoteColor=dot.dataset.color;renderColorPicker();});
+            });
+        }
+
+        function renderChecklistEditor(){
+            const editor=document.getElementById('checklistEditor');
+            let h='';
+            currentChecklist.forEach((item,i)=>{
+                h+='<div class="checklist-row">';
+                h+='<button class="checklist-check'+(item.checked?' checked':'')+'" data-idx="'+i+'"></button>';
+                h+='<input class="checklist-input'+(item.checked?' checked-input':'')+'" data-idx="'+i+'" value="'+escapeHtml(item.text)+'" placeholder="'+t('noteContentPH')+'">';
+                h+='<button class="checklist-del" data-idx="'+i+'">&#10005;</button>';
+                h+='</div>';
+            });
+            editor.innerHTML=h;
+            editor.querySelectorAll('.checklist-check').forEach(btn=>{
+                btn.addEventListener('click',()=>{const i=parseInt(btn.dataset.idx);currentChecklist[i].checked=!currentChecklist[i].checked;renderChecklistEditor();});
+            });
+            editor.querySelectorAll('.checklist-input').forEach(input=>{
+                input.addEventListener('input',()=>{const i=parseInt(input.dataset.idx);currentChecklist[i].text=input.value;});
+            });
+            editor.querySelectorAll('.checklist-del').forEach(btn=>{
+                btn.addEventListener('click',()=>{const i=parseInt(btn.dataset.idx);currentChecklist.splice(i,1);if(!currentChecklist.length)currentChecklist=[{text:'',checked:false}];renderChecklistEditor();});
+            });
+        }
+
+        document.getElementById('checklistAddBtn').addEventListener('click',()=>{currentChecklist.push({text:'',checked:false});renderChecklistEditor();const inputs=document.querySelectorAll('#checklistEditor .checklist-input');if(inputs.length)inputs[inputs.length-1].focus();});
+
+        document.getElementById('noteTypeText').addEventListener('click',()=>{currentNoteType='text';document.getElementById('noteTypeText').classList.add('active');document.getElementById('noteTypeCheck').classList.remove('active');document.getElementById('noteTextSection').style.display='block';document.getElementById('noteCheckSection').style.display='none';});
+        document.getElementById('noteTypeCheck').addEventListener('click',()=>{currentNoteType='checklist';document.getElementById('noteTypeCheck').classList.add('active');document.getElementById('noteTypeText').classList.remove('active');document.getElementById('noteCheckSection').style.display='block';document.getElementById('noteTextSection').style.display='none';});
+
+        document.getElementById('noteEditorClose').addEventListener('click',()=>document.getElementById('noteEditorOverlay').classList.remove('active'));
+        document.getElementById('noteEditorCancel').addEventListener('click',()=>document.getElementById('noteEditorOverlay').classList.remove('active'));
+        document.getElementById('noteEditorOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)e.target.classList.remove('active');});
+
+        document.getElementById('noteEditorSave').addEventListener('click',()=>{
+            const title=document.getElementById('noteTitleInput').value.trim();
+            const content=document.getElementById('noteContentInput').value.trim();
+            const wantLock=document.getElementById('noteLockToggle').checked;
+            const notes=loadNotes();
+            if(editingNoteId){
+                const note=notes.find(x=>x.id===editingNoteId);
+                if(note){
+                    note.title=title;note.color=currentNoteColor;note.type=currentNoteType;
+                    if(currentNoteType==='text')note.content=content;
+                    else note.checklist=currentChecklist.filter(x=>x.text.trim());
+                    if(wantLock&&!note.locked){
+                        pinMode='set';pinBuffer='';pinCallback=()=>{
+                            note.locked=true;note.pin=hashPin(pinBuffer);saveNotes(notes);
+                            document.getElementById('noteEditorOverlay').classList.remove('active');renderNotesGrid();showToast(t('saved'),t('locked'));
+                        };
+                        document.getElementById('pinTitle').textContent=t('setPin');showPinModal();return;
+                    }else if(!wantLock){note.locked=false;note.pin=null;}
+                }
+            }else{
+                const newNote={id:genId(),title,color:currentNoteColor,type:currentNoteType,content:currentNoteType==='text'?content:null,checklist:currentNoteType==='checklist'?currentChecklist.filter(x=>x.text.trim()):null,locked:false,pin:null,created:Date.now()};
+                if(wantLock){
+                    pinMode='set';pinBuffer='';pinCallback=()=>{
+                        newNote.locked=true;newNote.pin=hashPin(pinBuffer);notes.unshift(newNote);saveNotes(notes);
+                        document.getElementById('noteEditorOverlay').classList.remove('active');renderNotesGrid();showToast(t('saved'),t('locked'));
+                    };
+                    document.getElementById('pinTitle').textContent=t('setPin');showPinModal();return;
+                }
+                notes.unshift(newNote);
+            }
+            saveNotes(notes);document.getElementById('noteEditorOverlay').classList.remove('active');renderNotesGrid();showToast(t('saved'),title||'');
+        });
+
+        document.getElementById('noteDeleteBtn').addEventListener('click',()=>{
+            if(!editingNoteId)return;
+            const notes=loadNotes().filter(x=>x.id!==editingNoteId);saveNotes(notes);
+            document.getElementById('noteEditorOverlay').classList.remove('active');renderNotesGrid();
+        });
+
+        // PIN modal
+        function showPinModal(){pinBuffer='';updatePinDots();document.getElementById('pinOverlay').classList.add('active');}
+        function hidePinModal(){document.getElementById('pinOverlay').classList.remove('active');pinBuffer='';pinCallback=null;}
+        function updatePinDots(){document.querySelectorAll('#pinDots .pin-dot').forEach((d,i)=>{d.classList.toggle('filled',i<pinBuffer.length);});}
+
+        document.getElementById('pinClose').addEventListener('click',hidePinModal);
+        document.getElementById('pinOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)hidePinModal();});
+
+        document.getElementById('pinKeypad').addEventListener('click',e=>{
+            const key=e.target.closest('.pin-key');if(!key)return;
+            const v=key.dataset.val;
+            if(v==='del'){pinBuffer=pinBuffer.slice(0,-1);}
+            else if(v==='ok'){
+                if(pinMode==='set'&&pinBuffer.length>=4){
+                    if(pinCallback)pinCallback();
+                    hidePinModal();
+                }else if(pinMode==='unlock'){
+                    const notes=loadNotes();const note=notes.find(x=>x.locked&&x.pin===hashPin(pinBuffer));
+                    if(note){const cb=pinCallback;hidePinModal();if(cb)cb();}
+                    else{document.getElementById('pinTitle').textContent=t('wrongPin');setTimeout(()=>document.getElementById('pinTitle').textContent=t('enterPin'),1200);pinBuffer='';}
+                }
+            }else{if(pinBuffer.length<6)pinBuffer+=v;}
+            updatePinDots();
+        });
+
+        document.getElementById('notesFab').addEventListener('click',()=>openNoteEditor(null));
+
+        // ===== PWA INSTALL =====
+        let deferredInstallPrompt=null;
+        window.addEventListener('beforeinstallprompt',e=>{
+            e.preventDefault();
+            deferredInstallPrompt=e;
+            document.getElementById('installBtn').style.display='flex';
+        });
+        document.getElementById('installBtn').addEventListener('click',async()=>{
+            if(!deferredInstallPrompt)return;
+            deferredInstallPrompt.prompt();
+            const{outcome}=await deferredInstallPrompt.userChoice;
+            if(outcome==='accepted'){
+                showToast(t('saved'),t('installDone'));
+                document.getElementById('installBtn').style.display='none';
+            }
+            deferredInstallPrompt=null;
+        });
+        window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;document.getElementById('installBtn').style.display='none';});
+
+        // Init
+        switchView('calendar');
+    </script>
+</body>
+</html>
